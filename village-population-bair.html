@@ -1,0 +1,3091 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ប្រព័ន្ធគ្រប់គ្រងប្រជាជនភូមិ</title>
+<link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@100;300;400;700;900&family=Kantumruy+Pro:wght@300;400;500;600;700&family=Moul&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --primary-light: #2563a8;
+    --accent: #c8941a;
+    --accent-light: #f0b429;
+    --bg: #f0f4f8;
+    --bg-card: #ffffff;
+    --text: #1a2636;
+    --text-muted: #5a7394;
+    --border: #d0dce8;
+    --success: #1a8c5a;
+    --danger: #c0392b;
+    --warning: #e67e22;
+    --info: #2980b9;
+    --purple: #7c3aed;
+    --tab-active: #1a3a5c;
+    --shadow: 0 4px 24px rgba(26,58,92,0.10);
+    --radius: 14px;
+    --radius-sm: 8px;
+    --font-km: 'Kantumruy Pro', 'Hanuman', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-km);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, #0f2740 60%, #1a3a5c 100%);
+    color: #fff;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 72px;
+    box-shadow: 0 4px 24px rgba(26,58,92,0.25);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-logo {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    box-shadow: 0 2px 12px rgba(200,148,26,0.35);
+  }
+  .header-title { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.5px; }
+  .header-sub { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+  .header-right { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+  .btn-add-family {
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-family: var(--font-km);
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(200,148,26,0.3);
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-add-family:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(200,148,26,0.45); }
+  .btn-export {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.28);
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-family: var(--font-km);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .btn-export:hover { background: rgba(255,255,255,0.22); border-color: rgba(255,255,255,0.5); transform: translateY(-1px); }
+  .btn-import {
+    background: rgba(26,140,90,0.22);
+    color: #a8f0cc;
+    border: 1.5px solid rgba(26,140,90,0.45);
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-family: var(--font-km);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .btn-import:hover { background: rgba(26,140,90,0.35); transform: translateY(-1px); }
+
+  /* MAIN LAYOUT */
+  .main { display: flex; min-height: calc(100vh - 72px); }
+  .sidebar {
+    width: 240px;
+    background: var(--bg-card);
+    border-right: 1.5px solid var(--border);
+    padding: 20px 0;
+    flex-shrink: 0;
+    overflow-y: auto;
+    box-shadow: 2px 0 12px rgba(26,58,92,0.06);
+  }
+  .sidebar-section { margin-bottom: 8px; }
+  .sidebar-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0 20px 6px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 20px;
+    cursor: pointer;
+    font-size: 0.93rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .sidebar-item:hover { background: rgba(26,58,92,0.05); color: var(--primary); }
+  .sidebar-item.active {
+    background: rgba(26,58,92,0.08);
+    color: var(--primary);
+    border-left-color: var(--accent);
+    font-weight: 700;
+  }
+  .sidebar-item .icon { font-size: 1.1rem; min-width: 22px; text-align: center; }
+
+  /* CONTENT */
+  .content { flex: 1; padding: 28px 28px 40px; overflow-y: auto; }
+
+  /* PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* SEARCH BAR */
+  .search-bar-wrap {
+    display: flex; gap: 12px; align-items: center;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+  .search-bar-wrap input {
+    flex: 1;
+    border: none; outline: none;
+    font-family: var(--font-km);
+    font-size: 1rem;
+    color: var(--text);
+    background: transparent;
+  }
+  .search-bar-wrap .icon { font-size: 1.2rem; color: var(--text-muted); }
+  .btn-pdf {
+    padding: 9px 18px;
+    border-radius: 9px;
+    font-family: var(--font-km);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-pdf-person {
+    background: linear-gradient(135deg, #2563a8, #1a3a5c);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(37,99,168,0.25);
+  }
+  .btn-pdf-person:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(37,99,168,0.38); }
+  .btn-pdf-family {
+    background: linear-gradient(135deg, var(--success), #145c3e);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(26,140,90,0.25);
+  }
+  .btn-pdf-family:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(26,140,90,0.38); }
+  .btn-pdf-group {
+    background: linear-gradient(135deg, var(--purple), #5b21b6);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(124,58,237,0.25);
+  }
+  .btn-pdf-group:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(124,58,237,0.38); }
+
+  /* FAMILY CARDS */
+  .family-list { display: flex; flex-direction: column; gap: 20px; }
+  .family-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+    transition: box-shadow 0.2s;
+  }
+  .family-card:hover { box-shadow: 0 8px 36px rgba(26,58,92,0.14); }
+  .family-card-header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 24px;
+    background: linear-gradient(90deg, rgba(26,58,92,0.07) 0%, rgba(200,148,26,0.05) 100%);
+    border-bottom: 1.5px solid var(--border);
+  }
+  .family-code {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+  .family-card-header-title { font-size: 1rem; font-weight: 700; color: var(--primary); flex: 1; }
+  .family-actions { display: flex; gap: 8px; }
+  .btn-sm {
+    padding: 6px 14px;
+    border-radius: 7px;
+    font-family: var(--font-km);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary-sm { background: var(--primary); color: #fff; }
+  .btn-danger-sm { background: var(--danger); color: #fff; }
+  .btn-accent-sm { background: var(--accent); color: #fff; }
+  .btn-save-sm {
+    background: linear-gradient(135deg, var(--success), #145c3e);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-save-sm.saved {
+    background: linear-gradient(135deg, #2563a8, #1a3a5c) !important;
+  }
+  .btn-save-sm.saved::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.18);
+    animation: saveFlash 0.5s ease;
+  }
+  @keyframes saveFlash {
+    0% { opacity: 1; } 100% { opacity: 0; }
+  }
+  .btn-sm:hover { opacity: 0.87; transform: translateY(-1px); }
+
+  /* MEMBER TABLE */
+  .member-table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 1800px; }
+  thead tr { background: rgba(26,58,92,0.06); }
+  th {
+    padding: 10px 10px;
+    text-align: center;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+    font-size: 0.78rem;
+    position: sticky;
+    top: 0;
+    background: #f5f8fc;
+    z-index: 2;
+  }
+  td {
+    padding: 9px 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--text);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(26,58,92,0.03); }
+
+  .avatar-cell { width: 44px; height: 44px; object-fit: cover; border-radius: 50%; border: 2px solid var(--border); }
+  .avatar-placeholder {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #cdd8e8, #a8bcd0);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin: 0 auto;
+  }
+  .photo-upload-btn {
+    background: transparent; border: 1.5px dashed var(--border);
+    border-radius: 50%; width: 44px; height: 44px;
+    cursor: pointer; font-size: 1.1rem; display: flex;
+    align-items: center; justify-content: center;
+    margin: 0 auto; color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .photo-upload-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .doc-img-btn {
+    background: transparent; border: 1.5px dashed var(--border);
+    border-radius: 6px; width: 52px; height: 44px;
+    cursor: pointer; font-size: 0.9rem; display: flex;
+    align-items: center; justify-content: center;
+    margin: 0 auto; color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .doc-img-btn:hover { border-color: var(--info); color: var(--info); }
+  .doc-img-thumb {
+    width: 52px; height: 44px; object-fit: cover;
+    border-radius: 6px; border: 1.5px solid var(--border);
+    cursor: pointer; display: block; margin: 0 auto;
+    transition: all 0.15s;
+  }
+  .doc-img-thumb:hover { border-color: var(--info); box-shadow: 0 2px 8px rgba(41,128,185,0.25); }
+
+  input[type="text"], input[type="date"], select, textarea {
+    font-family: var(--font-km);
+    font-size: 0.8rem;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 8px;
+    background: #fff;
+    color: var(--text);
+    outline: none;
+    transition: border 0.15s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--primary-light); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .badge-poor1 { background: #fee2e2; color: #b91c1c; }
+  .badge-poor2 { background: #ffedd5; color: #c2410c; }
+  .badge-poor3 { background: #fef9c3; color: #a16207; }
+  .badge-normal { background: #dcfce7; color: #15803d; }
+  .badge-has { background: #dbeafe; color: #1e40af; }
+  .badge-no { background: #f3f4f6; color: #4b5563; }
+  .badge-lost { background: #fce7f3; color: #be185d; }
+  .badge-broken { background: #f5f3ff; color: #6d28d9; }
+  .badge-expired { background: #fef3c7; color: #b45309; }
+  .badge-processing { background: #cffafe; color: #0e7490; }
+
+  /* ADD MEMBER ROW */
+  .btn-add-member {
+    background: rgba(26,140,90,0.08);
+    border: 1.5px dashed var(--success);
+    color: var(--success);
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-family: var(--font-km);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 12px 20px;
+    display: flex; align-items: center; gap: 6px;
+    transition: all 0.15s;
+  }
+  .btn-add-member:hover { background: rgba(26,140,90,0.15); }
+
+  /* STATS TABS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; gap: 16px;
+  }
+  .stat-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  .stat-num { font-size: 2rem; font-weight: 900; color: var(--primary); line-height: 1; }
+  .stat-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+  .stat-pct { font-size: 0.78rem; font-weight: 700; color: var(--accent); margin-top: 4px; }
+
+  .section-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::before {
+    content: '';
+    display: block;
+    width: 4px; height: 22px;
+    background: linear-gradient(180deg, var(--accent), var(--accent-light));
+    border-radius: 2px;
+  }
+
+  /* AGE TABLE */
+  .age-table-wrap { background: var(--bg-card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+  .age-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .age-table th { background: var(--primary); color: #fff; padding: 11px 16px; text-align: left; }
+  .age-table td { padding: 9px 16px; border-bottom: 1px solid var(--border); }
+  .age-table tr:last-child td { border-bottom: none; }
+  .age-table tr:nth-child(even) td { background: rgba(26,58,92,0.025); }
+  .pct-bar {
+    height: 8px; border-radius: 4px;
+    background: linear-gradient(90deg, var(--primary-light), var(--accent));
+    display: inline-block;
+    min-width: 2px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10,20,40,0.55);
+    z-index: 1000;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(3px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg-card);
+    border-radius: 18px;
+    box-shadow: 0 24px 80px rgba(10,20,40,0.35);
+    width: 95vw; max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 32px;
+    animation: modalIn 0.22s cubic-bezier(.4,0,.2,1);
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(30px) scale(0.97); } to { opacity: 1; transform: none; } }
+  .modal-title { font-size: 1.2rem; font-weight: 800; color: var(--primary); margin-bottom: 22px; display: flex; align-items: center; gap: 10px; }
+  .modal-field { margin-bottom: 16px; }
+  .modal-label { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+  .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+  .btn-modal-ok {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 9px;
+    font-family: var(--font-km);
+    font-size: 0.93rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-modal-cancel {
+    background: var(--bg);
+    color: var(--text-muted);
+    border: 1.5px solid var(--border);
+    padding: 10px 22px;
+    border-radius: 9px;
+    font-family: var(--font-km);
+    font-size: 0.93rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* SEARCH RESULT */
+  .search-result-highlight td { background: rgba(200,148,26,0.10) !important; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 1rem; }
+
+  /* PAGINATION / scroll hint */
+  .scroll-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    padding: 6px 20px 10px;
+    text-align: right;
+  }
+
+  /* PRINT HIDDEN */
+  @media print { .no-print { display: none !important; } }
+
+  .tag-group { display: flex; flex-direction: column; gap: 3px; }
+
+  /* Navigation title at top of content */
+  .page-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 22px;
+  }
+  .page-title { font-size: 1.4rem; font-weight: 900; color: var(--primary); }
+  .page-subtitle { font-size: 0.85rem; color: var(--text-muted); }
+
+  .info-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .info-chip {
+    background: rgba(26,58,92,0.07);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    color: var(--primary);
+    font-weight: 600;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .info-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+
+  select option[value="abroad"] { color: var(--purple); font-weight: bold; }
+
+  /* REPORT BUTTON */
+  .btn-report {
+    background: linear-gradient(135deg, #c8941a, #f0b429);
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-family: var(--font-km);
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(200,148,26,0.3);
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-report:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(200,148,26,0.45); }
+
+  .report-btn-group { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .report-btn-row { display: flex; gap: 8px; }
+  .btn-report-has, .btn-report-missing {
+    border: none;
+    padding: 8px 18px;
+    border-radius: 9px;
+    font-family: var(--font-km);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+    color: #fff;
+  }
+  .btn-report-has { background: linear-gradient(135deg, var(--success), #145c3e); box-shadow: 0 2px 10px rgba(26,140,90,0.3); }
+  .btn-report-has:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(26,140,90,0.42); }
+  .btn-report-missing { background: linear-gradient(135deg, var(--danger), #8b1a12); box-shadow: 0 2px 10px rgba(192,57,43,0.3); }
+  .btn-report-missing:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(192,57,43,0.42); }
+
+  .btn-download-pdf {
+    background: linear-gradient(135deg, #2563a8, #1a3a5c);
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 9px;
+    font-family: var(--font-km);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(37,99,168,0.3);
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-download-pdf:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(37,99,168,0.42); }
+  .btn-download-pdf:disabled { opacity: 0.6; cursor: wait; transform: none; }
+
+  /* REPORT MODAL */
+  .report-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10,20,40,0.65);
+    z-index: 1500;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .report-overlay.open { display: flex; }
+  .report-modal {
+    background: #f5f7fa;
+    border-radius: 16px;
+    width: 98vw;
+    max-width: 1150px;
+    max-height: 96vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 80px rgba(10,20,40,0.4);
+    overflow: hidden;
+    animation: modalIn 0.22s cubic-bezier(.4,0,.2,1);
+  }
+  .report-modal-header {
+    background: linear-gradient(135deg, var(--primary) 0%, #0f2740 100%);
+    color: #fff;
+    padding: 16px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .report-modal-title { font-size: 1.05rem; font-weight: 700; }
+  .report-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .report-modal-footer {
+    padding: 14px 28px;
+    background: #fff;
+    border-top: 1.5px solid var(--border);
+    display: flex; gap: 12px; align-items: center; flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  /* A4 LANDSCAPE REPORT SHEET */
+  .report-sheet {
+    background: #fff;
+    width: 100%;
+    max-width: 1050px;
+    margin: 0 auto;
+    border: 1px solid #c8d4e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(26,58,92,0.10);
+    font-family: var(--font-km);
+    overflow: hidden;
+  }
+  .report-kh-header {
+    text-align: center;
+    padding: 14px 20px 8px;
+    border-bottom: 2px solid var(--primary);
+  }
+  .report-kh-header .line1 { font-family: 'Moul', serif; font-size: 1.25rem; font-weight: 400; color: #1a2636; letter-spacing: 0.5px; }
+  .report-kh-header .line2 { font-family: 'Moul', serif; font-size: 1rem; font-weight: 400; color: #1a2636; margin-top: 4px; letter-spacing: 0.5px; }
+  .report-kh-header .line3 { font-size: 1.1rem; font-weight: 900; color: var(--primary); margin-top: 6px; }
+  .report-kh-header .line-admin { font-size: 0.8rem; color: var(--primary-light); font-weight: 600; margin-top: 5px; }
+  .report-kh-header .line4 { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+  .report-table-wrap { padding: 0 18px 10px; overflow-x: auto; }
+  .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    margin-top: 10px;
+  }
+  .report-table th {
+    background: var(--primary);
+    color: #fff;
+    padding: 9px 10px;
+    text-align: center;
+    font-weight: 700;
+    border: 1px solid #b0c0d0;
+    white-space: nowrap;
+  }
+  .report-table td {
+    padding: 7px 10px;
+    border: 1px solid #d0dce8;
+    text-align: center;
+    vertical-align: middle;
+  }
+  .report-table tr:nth-child(even) td { background: #f5f8fc; }
+  .report-sig-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 18px 40px 20px;
+    font-size: 0.88rem;
+    font-family: var(--font-km);
+  }
+  .report-sig-box { text-align: center; min-width: 200px; }
+  .report-sig-box .sig-title { font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+  .report-sig-box .sig-name-line {
+    margin-top: 44px;
+    border-top: 1.5px solid #333;
+    padding-top: 5px;
+    font-size: 0.8rem;
+    color: #555;
+  }
+  .btn-report-pdf {
+    padding: 10px 22px;
+    border-radius: 9px;
+    font-family: var(--font-km);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .btn-rpt-person { background: linear-gradient(135deg,#2563a8,#1a3a5c); color:#fff; box-shadow:0 2px 10px rgba(37,99,168,0.25); }
+  .btn-rpt-person:hover { transform:translateY(-1px); box-shadow:0 4px 18px rgba(37,99,168,0.38); }
+  .btn-rpt-family { background: linear-gradient(135deg,var(--success),#145c3e); color:#fff; box-shadow:0 2px 10px rgba(26,140,90,0.25); }
+  .btn-rpt-family:hover { transform:translateY(-1px); box-shadow:0 4px 18px rgba(26,140,90,0.38); }
+  .btn-rpt-group { background: linear-gradient(135deg,var(--purple),#5b21b6); color:#fff; box-shadow:0 2px 10px rgba(124,58,237,0.25); }
+  .btn-rpt-group:hover { transform:translateY(-1px); box-shadow:0 4px 18px rgba(124,58,237,0.38); }
+  .btn-rpt-close { background: var(--bg); color: var(--text-muted); border: 1.5px solid var(--border); padding: 10px 20px; border-radius: 9px; font-family: var(--font-km); font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+  .report-no-data { text-align:center; padding:40px; color:var(--text-muted); font-size:1rem; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">🏘️</div>
+  <div>
+    <div class="header-title">ប្រព័ន្ធគ្រប់គ្រងប្រជាជនភូមិ</div>
+    <div class="header-sub">Village Population Management System</div>
+  </div>
+  <div class="header-right no-print">
+    <button class="btn-export" onclick="openAdminModal()" title="កំណត់ព័ត៌មានរដ្ឋបាល (ខេត្ត/ស្រុក/ឃុំ/ភូមិ)" style="background:rgba(200,148,26,0.18);border-color:rgba(200,148,26,0.4);color:#ffd98c;">
+      ⚙️ ព័ត៌មានរដ្ឋបាល
+    </button>
+    <button class="btn-export" onclick="exportJSON()" title="រក្សាទុកទិន្នន័យទាំងអស់ជា JSON">
+      ⬇ Export JSON
+    </button>
+    <label class="btn-import" title="នាំចូលទិន្នន័យពី JSON">
+      ⬆ Import JSON
+      <input type="file" id="import-file-input" accept=".json" onchange="importJSON(this)" style="display:none"/>
+    </label>
+    <button class="btn-add-family" onclick="openAddFamilyModal()">＋ បន្ថែមគ្រួសារថ្មី</button>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div id="toast" style="
+  position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(80px);
+  background:linear-gradient(135deg,#1a3a5c,#2563a8);
+  color:#fff; padding:13px 28px; border-radius:12px;
+  font-family:var(--font-km); font-size:0.95rem; font-weight:600;
+  box-shadow:0 8px 32px rgba(26,58,92,0.28);
+  z-index:9999; opacity:0; transition:all 0.35s cubic-bezier(.4,0,.2,1);
+  display:flex; align-items:center; gap:10px; white-space:nowrap;
+"></div>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- SIDEBAR -->
+  <div class="sidebar no-print">
+    <div class="sidebar-section">
+      <div class="sidebar-label">ការគ្រប់គ្រង</div>
+      <div class="sidebar-item active" onclick="showPanel('families')" id="nav-families">
+        <span class="icon">👨‍👩‍👧‍👦</span> ស្ថានភាពគ្រួសារ
+      </div>
+      <div class="sidebar-item" onclick="showPanel('search')" id="nav-search">
+        <span class="icon">🔍</span> ស្វែងរក / PDF
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">ស្ថិតិ</div>
+      <div class="sidebar-item" onclick="showPanel('school-age')" id="nav-school-age">
+        <span class="icon">🎒</span> កុមារអាយុចូលរៀន
+      </div>
+      <div class="sidebar-item" onclick="showPanel('age')" id="nav-age">
+        <span class="icon">📊</span> ចំនួនប្រជាជន(អាយុ)
+      </div>
+      <div class="sidebar-item" onclick="showPanel('birth')" id="nav-birth">
+        <span class="icon">📋</span> ព័ត៌មានសំបុត្រកំណើត
+      </div>
+      <div class="sidebar-item" onclick="showPanel('id')" id="nav-id">
+        <span class="icon">🪪</span> ព័ត៌មានអត្តសញ្ញាណបណ្ណ
+      </div>
+      <div class="sidebar-item" onclick="showPanel('family-book')" id="nav-family-book">
+        <span class="icon">📕</span> ព័ត៌មានសៀវភៅគ្រួសារ
+      </div>
+      <div class="sidebar-item" onclick="showPanel('residence')" id="nav-residence">
+        <span class="icon">📗</span> សៀវភៅស្នាក់នៅ
+      </div>
+      <div class="sidebar-item" onclick="showPanel('migration')" id="nav-migration">
+        <span class="icon">✈️</span> ប្រជាជនចំណាកស្រុក
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ====== PANEL: FAMILIES ====== -->
+    <div class="panel active" id="panel-families">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ស្ថានភាពគ្រួសារ</div>
+          <div class="page-subtitle">គ្រប់គ្រងព័ត៌មានគ្រួសារ និងសមាជិក</div>
+        </div>
+        <div id="family-summary" class="info-row"></div>
+      </div>
+      <div class="family-list" id="family-list">
+        <div class="empty-state">
+          <div class="icon">👨‍👩‍👧‍👦</div>
+          <p>មិនទាន់មានគ្រួសារណាមួយទេ។ ចុចប៊ូតុង "បន្ថែមគ្រួសារថ្មី" ខាងលើ។</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== PANEL: SEARCH ====== -->
+    <div class="panel" id="panel-search">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ស្វែងរកបុគ្គល</div>
+          <div class="page-subtitle">ស្វែងរកបុគ្គល ហើយទាញយក PDF</div>
+        </div>
+      </div>
+      <div class="search-bar-wrap">
+        <span class="icon">🔍</span>
+        <input type="text" id="search-input" placeholder="វាយឈ្មោះ គោត្តនាម ឬលេខកូដ..." oninput="doSearch()" />
+        <button class="btn-pdf btn-pdf-person" onclick="downloadPDFPerson()">📄 PDF (បុគ្គល)</button>
+        <button class="btn-pdf btn-pdf-family" onclick="downloadPDFFamily()">📋 PDF (គ្រួសារ)</button>
+        <button class="btn-pdf btn-pdf-group" onclick="downloadPDFGroup()">👥 PDF (ក្រុម)</button>
+      </div>
+      <div id="search-results"></div>
+    </div>
+
+    <!-- ====== PANEL: SCHOOL-AGE ====== -->
+    <div class="panel" id="panel-school-age">
+      <div class="page-header">
+        <div>
+          <div class="page-title">កុមារអាយុចូលរៀន</div>
+          <div class="page-subtitle">ស្រង់បញ្ជីកុមារត្រៀមចូលរៀនសម្រាប់ឆ្នាំសិក្សាបន្តខាងមុខ</div>
+        </div>
+        <div class="report-btn-group no-print">
+          <div class="report-btn-row">
+            <button class="btn-report" onclick="printSchoolAgeReport()">📊 របាយការណ៍</button>
+            <button class="btn-download-pdf" id="pdf-btn-school-age" onclick="downloadStatsPDF('panel-school-age','កុមារអាយុចូលរៀន','pdf-btn-school-age')">⬇️ PDF</button>
+          </div>
+        </div>
+      </div>
+      <div class="search-bar-wrap" style="flex-wrap:wrap;">
+        <span class="icon">📅</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <label style="font-size:0.85rem;color:var(--text-muted);font-weight:600;">ថ្ងៃកាត់គណនាអាយុ (ចាប់ផ្ដើមឆ្នាំសិក្សា)៖</label>
+          <input type="date" id="school-cutoff-date" onchange="renderSchoolAgeStats()" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-family:var(--font-km);font-size:0.9rem;color:var(--text);"/>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-left:auto;">💡 អាយុគណនាគឺគិតត្រឹមថ្ងៃដែលបានជ្រើសរើសខាងលើ</div>
+      </div>
+      <div id="school-age-stats"></div>
+    </div>
+
+    <!-- ====== PANEL: AGE ====== -->
+    <div class="panel" id="panel-age">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ចំនួនប្រជាជន (គិតតាមអាយុ)</div>
+          <div class="page-subtitle">ស្ថិតិប្រជាជនចាត់ចែងតាមក្រុមអាយុ</div>
+        </div>
+        <div class="report-btn-group no-print">
+          <div class="report-btn-row">
+            <button class="btn-report" onclick="printAgeReport()">📊 របាយការណ៍</button>
+            <button class="btn-download-pdf" id="pdf-btn-age" onclick="downloadStatsPDF('panel-age','ចំនួនប្រជាជនតាមអាយុ','pdf-btn-age')">⬇️ PDF</button>
+          </div>
+        </div>
+      </div>
+      <div id="age-stats"></div>
+    </div>
+
+    <!-- ====== PANEL: BIRTH ====== -->
+    <div class="panel" id="panel-birth">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ព័ត៌មានសំបុត្រកំណើត</div>
+        </div>
+        <div class="report-btn-group no-print">
+          <div class="report-btn-row">
+            <button class="btn-report">📊 របាយការណ៍</button>
+            <button class="btn-download-pdf" id="pdf-btn-birth" onclick="downloadStatsPDF('panel-birth','ព័ត៌មានសំបុត្រកំណើត','pdf-btn-birth')">⬇️ PDF</button>
+          </div>
+          <div class="report-btn-row">
+            <button class="btn-report-has" onclick="printPresenceReport('birth_cert','សំបុត្រកំណើត','has')">✅ មាន</button>
+            <button class="btn-report-missing" onclick="printPresenceReport('birth_cert','សំបុត្រកំណើត','missing')">❌ គ្មាន</button>
+          </div>
+        </div>
+      </div>
+      <div id="birth-stats"></div>
+    </div>
+
+    <!-- ====== PANEL: ID ====== -->
+    <div class="panel" id="panel-id">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ព័ត៌មានអត្តសញ្ញាណបណ្ណ</div>
+        </div>
+        <div class="report-btn-group no-print">
+          <div class="report-btn-row">
+            <button class="btn-report">📊 របាយការណ៍</button>
+            <button class="btn-download-pdf" id="pdf-btn-id" onclick="downloadStatsPDF('panel-id','ព័ត៌មានអត្តសញ្ញាណបណ្ណ','pdf-btn-id')">⬇️ PDF</button>
+          </div>
+          <div class="report-btn-row">
+            <button class="btn-report-has" onclick="printPresenceReport('national_id','អត្តសញ្ញាណបណ្ណ','has')">✅ មាន</button>
+            <button class="btn-report-missing" onclick="printPresenceReport('national_id','អត្តសញ្ញាណបណ្ណ','missing')">❌ គ្មាន</button>
+          </div>
+        </div>
+      </div>
+      <div id="id-stats"></div>
+    </div>
+
+    <!-- ====== PANEL: FAMILY BOOK ====== -->
+    <div class="panel" id="panel-family-book">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ព័ត៌មានសៀវភៅគ្រួសារ</div>
+        </div>
+        <div class="report-btn-group no-print">
+          <div class="report-btn-row">
+            <button class="btn-report">📊 របាយការណ៍</button>
+            <button class="btn-download-pdf" id="pdf-btn-family-book" onclick="downloadStatsPDF('panel-family-book','ព័ត៌មានសៀវភៅគ្រួសារ','pdf-btn-family-book')">⬇️ PDF</button>
+          </div>
+          <div class="report-btn-row">
+            <button class="btn-report-has" onclick="printPresenceReport('family_book','សៀវភៅគ្រួសារ','has')">✅ មាន</button>
+            <button class="btn-report-missing" onclick="printPresenceReport('family_book','សៀវភៅគ្រួសារ','missing')">❌ គ្មាន</button>
+          </div>
+        </div>
+      </div>
+      <div id="family-book-stats"></div>
+    </div>
+
+    <!-- ====== PANEL: RESIDENCE ====== -->
+    <div class="panel" id="panel-residence">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ព័ត៌មានសៀវភៅស្នាក់នៅ</div>
+        </div>
+        <div class="report-btn-group no-print">
+          <div class="report-btn-row">
+            <button class="btn-report">📊 របាយការណ៍</button>
+            <button class="btn-download-pdf" id="pdf-btn-residence" onclick="downloadStatsPDF('panel-residence','ព័ត៌មានសៀវភៅស្នាក់នៅ','pdf-btn-residence')">⬇️ PDF</button>
+          </div>
+          <div class="report-btn-row">
+            <button class="btn-report-has" onclick="printPresenceReport('residence_book','សៀវភៅស្នាក់នៅ','has')">✅ មាន</button>
+            <button class="btn-report-missing" onclick="printPresenceReport('residence_book','សៀវភៅស្នាក់នៅ','missing')">❌ គ្មាន</button>
+          </div>
+        </div>
+      </div>
+      <div id="residence-stats"></div>
+    </div>
+
+    <!-- ====== PANEL: MIGRATION ====== -->
+    <div class="panel" id="panel-migration">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ព័ត៌មានប្រជាជនចំណាកស្រុក</div>
+        </div>
+        <div class="report-btn-group no-print">
+          <div class="report-btn-row">
+            <button class="btn-report">📊 របាយការណ៍</button>
+            <button class="btn-download-pdf" id="pdf-btn-migration" onclick="downloadStatsPDF('panel-migration','ព័ត៌មានប្រជាជនចំណាកស្រុក','pdf-btn-migration')">⬇️ PDF</button>
+          </div>
+          <div class="report-btn-row">
+            <button class="btn-report-has" onclick="printPresenceReport('work_location','ចំណាកស្រុក','has')">✅ មាន</button>
+            <button class="btn-report-missing" onclick="printPresenceReport('work_location','ចំណាកស្រុក','missing')">❌ គ្មាន</button>
+          </div>
+        </div>
+      </div>
+      <div id="migration-stats"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- REPORT MODAL -->
+<div class="report-overlay no-print" id="report-modal-overlay">
+  <div class="report-modal">
+    <div class="report-modal-header">
+      <div class="report-modal-title" id="report-modal-title">📊 របាយការណ៍</div>
+      <button onclick="closeReportModal()" style="background:rgba(255,255,255,0.15);color:#fff;border:1.5px solid rgba(255,255,255,0.3);padding:8px 18px;border-radius:8px;font-family:var(--font-km);font-size:0.9rem;font-weight:600;cursor:pointer;">✕ បិទ</button>
+    </div>
+    <div class="report-modal-body">
+      <div id="report-sheet-container"></div>
+    </div>
+    <div class="report-modal-footer">
+      <button class="btn-report-pdf btn-rpt-person" onclick="printReport('person')">📄 PDF បុគ្គល</button>
+      <button class="btn-report-pdf btn-rpt-family" onclick="printReport('family')">📋 PDF គ្រួសារ</button>
+      <button class="btn-report-pdf btn-rpt-group" onclick="printReport('group')">👥 PDF ក្រុម</button>
+      <button class="btn-rpt-close" onclick="closeReportModal()">✕ បិទ</button>
+    </div>
+  </div>
+</div>
+
+<!-- PDF PREVIEW MODAL -->
+<div class="modal-overlay" id="pdf-preview-modal" style="z-index:2000;align-items:stretch;padding:0;">
+  <div style="display:flex;flex-direction:column;width:100%;height:100%;background:#2a3a4d;">
+    <!-- Toolbar -->
+    <div style="background:linear-gradient(135deg,#1a3a5c 0%,#0f2740 100%);padding:14px 28px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 16px rgba(0,0,0,0.3);flex-shrink:0;">
+      <div style="color:#fff;font-family:var(--font-km);">
+        <div style="font-size:1rem;font-weight:700;">👁 មើលសាកមុន (Preview)</div>
+        <div id="pdf-preview-subtitle" style="font-size:0.78rem;color:rgba(255,255,255,0.6);margin-top:2px;"></div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:10px;align-items:center;">
+        <button onclick="doPrint()" style="background:linear-gradient(135deg,#c8941a,#f0b429);color:#fff;border:none;padding:10px 24px;border-radius:10px;font-family:var(--font-km);font-size:0.93rem;font-weight:700;cursor:pointer;box-shadow:0 2px 12px rgba(200,148,26,0.4);">
+          🖨️ បោះពុម្ព / រក្សាទុក PDF
+        </button>
+        <button onclick="closePreview()" style="background:rgba(255,255,255,0.12);color:#fff;border:1.5px solid rgba(255,255,255,0.25);padding:10px 20px;border-radius:10px;font-family:var(--font-km);font-size:0.9rem;font-weight:600;cursor:pointer;">
+          ✕ បិទ
+        </button>
+      </div>
+    </div>
+    <!-- Scroll Area -->
+    <div style="flex:1;overflow-y:auto;overflow-x:auto;padding:32px 24px;display:flex;flex-direction:column;align-items:center;background:#2a3a4d;">
+      <div id="pdf-preview-pages" style="display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD FAMILY MODAL -->
+<div class="modal-overlay" id="add-family-modal">
+  <div class="modal">
+    <div class="modal-title">📋 បន្ថែមគ្រួសារថ្មី</div>
+    <div class="modal-field">
+      <div class="modal-label">ឈ្មោះក្រុម (ក្រុមទី...)</div>
+      <input type="text" id="new-family-group" placeholder="ឈ្មោះក្រុម..." />
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">ចំនួនសមាជិក (អតិបរមា ១៥ នាក់)</div>
+      <input type="number" id="new-family-count" min="1" max="15" value="1" style="width:120px" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal('add-family-modal')">បោះបង់</button>
+      <button class="btn-modal-ok" onclick="addFamily()">បន្ថែម</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMINISTRATIVE INFO MODAL -->
+<div class="modal-overlay" id="admin-info-modal">
+  <div class="modal">
+    <div class="modal-title">⚙️ ព័ត៌មានរដ្ឋបាល (សម្រាប់ក្បាលលិខិតរបាយការណ៍)</div>
+    <div class="modal-field">
+      <div class="modal-label">ខេត្ត/ក្រុង</div>
+      <input type="text" id="admin-province" placeholder="ឧ. កំពង់ចាម" />
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">ស្រុក/ខណ្ឌ</div>
+      <input type="text" id="admin-district" placeholder="ឧ. ស្រុក..." />
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">ឃុំ/សង្កាត់</div>
+      <input type="text" id="admin-commune" placeholder="ឧ. ឃុំ..." />
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">ភូមិ</div>
+      <input type="text" id="admin-village" placeholder="ឧ. ភូមិ..." />
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">ឈ្មោះមេភូមិ</div>
+      <input type="text" id="admin-chief-name" placeholder="ឈ្មោះមេភូមិ..." />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal('admin-info-modal')">បោះបង់</button>
+      <button class="btn-modal-ok" onclick="saveAdminInfo()">រក្សាទុក</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA STORE =====
+let families = JSON.parse(localStorage.getItem('vpm_families') || '[]');
+let familyCounter = parseInt(localStorage.getItem('vpm_fc') || '0');
+
+const PROVINCES = [
+  'ភ្នំពេញ','បន្ទាយមានជ័យ','បាត់ដំបង','កំពង់ចាម','កំពង់ឆ្នាំង',
+  'កំពង់ស្ពឺ','កំពង់ធំ','កំពត','កណ្ដាល','កោះកុង','ក្រចេះ',
+  'មណ្ឌលគិរី','ឧត្តរមានជ័យ','បៃលិន','ប៉ៃលិន','ព្រះវិហារ',
+  'ព្រែកវែង','ពោធិ៍សាត់','រតនគីរី','សៀមរាប','ព្រះសីហនុ',
+  'ស្ទឹងត្រែង','ស្វាយរៀង','តាកែវ','ត្បូងឃ្មុំ',
+];
+
+const COLS = [
+  {key:'photo', label:'រូបថត'},
+  {key:'house_code', label:'កូដគ្រួសារ/ខ្នងផ្ទះ'},
+  {key:'group', label:'ឈ្មោះក្រុម'},
+  {key:'num', label:'ល.រ'},
+  {key:'name', label:'គោត្តនាម និងនាម'},
+  {key:'gender', label:'ភេទ'},
+  {key:'dob', label:'ថ្ងៃខែឆ្នាំ'},
+  {key:'age', label:'អាយុ'},
+  {key:'birthplace', label:'ទីកន្លែងកំណើត'},
+  {key:'occupation', label:'មុខរបរ'},
+  {key:'currentplace', label:'ទីកន្លែងបច្ចុប្បន្ន'},
+  {key:'status', label:'ស្ថានភាព'},
+  {key:'equity_card', label:'បណ្ណសមធម៌'},
+  {key:'birth_cert', label:'សំបុត្រកំណើត'},
+  {key:'national_id', label:'អត្តសញ្ញាណបណ្ណ'},
+  {key:'id_issue_date', label:'ថ្ងៃខែឆ្នាំផលិត'},
+  {key:'id_expiry_date', label:'ថ្ងៃខែឆ្នាំផុតកំណត់'},
+  {key:'family_book', label:'សៀវភៅគ្រួសារ'},
+  {key:'residence_book', label:'សៀវភៅស្នាក់នៅ'},
+  {key:'work_location', label:'កន្លែងធ្វើការ'},
+  {key:'work_note', label:'ចំណាំ (ប្រទេស)'},
+];
+
+function save() {
+  localStorage.setItem('vpm_families', JSON.stringify(families));
+  localStorage.setItem('vpm_fc', familyCounter.toString());
+}
+
+// ===== ADMINISTRATIVE INFO (used on every official letterhead) =====
+let adminInfo = JSON.parse(localStorage.getItem('vpm_admin_info') || '{}');
+
+function openAdminModal() {
+  document.getElementById('admin-province').value = adminInfo.province || '';
+  document.getElementById('admin-district').value = adminInfo.district || '';
+  document.getElementById('admin-commune').value = adminInfo.commune || '';
+  document.getElementById('admin-village').value = adminInfo.village || '';
+  document.getElementById('admin-chief-name').value = adminInfo.chiefName || '';
+  document.getElementById('admin-info-modal').classList.add('open');
+}
+
+function saveAdminInfo() {
+  adminInfo = {
+    province: document.getElementById('admin-province').value.trim(),
+    district: document.getElementById('admin-district').value.trim(),
+    commune: document.getElementById('admin-commune').value.trim(),
+    village: document.getElementById('admin-village').value.trim(),
+    chiefName: document.getElementById('admin-chief-name').value.trim(),
+  };
+  localStorage.setItem('vpm_admin_info', JSON.stringify(adminInfo));
+  closeModal('admin-info-modal');
+  showToast('បានរក្សាទុកព័ត៌មានរដ្ឋបាលដោយជោគជ័យ!', 'success', 2500);
+}
+
+// Builds the standard official Khmer government letterhead block (used across every printable report)
+function getAdminHeaderHTML(titleLine, subLine) {
+  const locBits = [
+    adminInfo.province ? 'ខេត្ត/ក្រុង៖ ' + adminInfo.province : '',
+    adminInfo.district ? 'ស្រុក/ខណ្ឌ៖ ' + adminInfo.district : '',
+    adminInfo.commune ? 'ឃុំ/សង្កាត់៖ ' + adminInfo.commune : '',
+    adminInfo.village ? 'ភូមិ៖ ' + adminInfo.village : '',
+  ].filter(Boolean).join(' &nbsp;|&nbsp; ');
+
+  return `
+    <div class="line1">ព្រះរាជាណាចក្រកម្ពុជា</div>
+    <div class="line2">ជាតិ &nbsp;&nbsp;&nbsp; សាសនា &nbsp;&nbsp;&nbsp; ព្រះមហាក្សត្រ</div>
+    ${locBits ? `<div class="line-admin">${locBits}</div>` : ''}
+    <div class="line3">${titleLine}</div>
+    <div class="line4">${subLine}</div>`;
+}
+
+// Standard signature block: village chief (left) + report author or commune chief (right)
+function getSigRowHTML(rightTitle) {
+  const chiefLine = adminInfo.chiefName ? `<div class="sig-name-preset">${adminInfo.chiefName}</div>` : '';
+  return `
+    <div class="sig-row">
+      <div class="sig-box">
+        <div class="sig-title">មេភូមិ${adminInfo.village ? ' ' + adminInfo.village : ''}</div>
+        <div class="sig-line">ហត្ថលេខា និងឈ្មោះ</div>
+        ${chiefLine}
+      </div>
+      <div class="sig-box">
+        <div class="sig-title">${rightTitle || 'អ្នកធ្វើរបាយការណ៍'}</div>
+        <div class="sig-line">ហត្ថលេខា និងឈ្មោះ</div>
+      </div>
+    </div>`;
+}
+
+// ===== SAVE FAMILY WITH CONFIRM =====
+function saveFamily(fi) {
+  save();
+  const f = families[fi];
+  // Visual feedback on button
+  const btn = document.getElementById('save-btn-' + fi);
+  if (btn) {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ រក្សាទុករួច!';
+    btn.classList.add('saved');
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.classList.remove('saved');
+      btn.disabled = false;
+    }, 2000);
+  }
+  showToast('គ្រួសារ ' + f.id + ' (' + f.group + ') — រក្សាទុករួចហើយ! (' + f.members.length + ' នាក់)', 'success', 3000);
+}
+
+// ===== AGE CALC =====
+function calcAge(dob) {
+  if (!dob) return '';
+  const b = new Date(dob), n = new Date();
+  let age = n.getFullYear() - b.getFullYear();
+  const m = n.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && n.getDate() < b.getDate())) age--;
+  // check if < 1 year
+  const diffMs = n - b;
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffDays < 3) return '<3ថ្ងៃ';
+  if (age < 1) {
+    const months = Math.floor(diffDays / 30.44);
+    return months + 'ខែ';
+  }
+  return age;
+}
+
+function calcAgeNum(dob) {
+  if (!dob) return -1;
+  const b = new Date(dob), n = new Date();
+  const diffMs = n - b;
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffDays < 3) return -1;
+  let age = n.getFullYear() - b.getFullYear();
+  const m = n.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && n.getDate() < b.getDate())) age--;
+  if (age < 1) return 0;
+  return age;
+}
+
+// ===== SCHOOL-AGE CHILDREN (school enrollment planning) =====
+const SCHOOL_LEVELS = [
+  {age:3, label:'មត្តេយ្យ (ក្រុមតូច)'},
+  {age:4, label:'មត្តេយ្យ (ក្រុមមធ្យម)'},
+  {age:5, label:'មត្តេយ្យ (ក្រុមធំ)'},
+  {age:6, label:'ថ្នាក់ទី១'},
+  {age:7, label:'ថ្នាក់ទី២'},
+  {age:8, label:'ថ្នាក់ទី៣'},
+  {age:9, label:'ថ្នាក់ទី៤'},
+  {age:10, label:'ថ្នាក់ទី៥'},
+  {age:11, label:'ថ្នាក់ទី៦'},
+  {age:12, label:'ថ្នាក់ទី៧'},
+  {age:13, label:'ថ្នាក់ទី៨'},
+  {age:14, label:'ថ្នាក់ទី៩'},
+  {age:15, label:'ថ្នាក់ទី១០'},
+  {age:16, label:'ថ្នាក់ទី១១'},
+  {age:17, label:'ថ្នាក់ទី១២'},
+];
+
+function calcAgeAt(dob, atDateStr) {
+  if (!dob) return -1;
+  const b = new Date(dob);
+  const at = atDateStr ? new Date(atDateStr) : new Date();
+  let age = at.getFullYear() - b.getFullYear();
+  const m = at.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && at.getDate() < b.getDate())) age--;
+  return age;
+}
+
+function getSchoolCutoffDate() {
+  const input = document.getElementById('school-cutoff-date');
+  if (input && input.value) return input.value;
+  // Default suggestion: 1 November of the upcoming school year (editable by the user)
+  const now = new Date();
+  let year = now.getFullYear();
+  if (now.getMonth() >= 10) year += 1;
+  const def = year + '-11-01';
+  if (input) input.value = def;
+  return def;
+}
+
+function getSchoolAgeGroups() {
+  const cutoff = getSchoolCutoffDate();
+  const all = getAllMembers().filter(m => m.dob);
+  const grouped = SCHOOL_LEVELS.map(lvl => {
+    const c = all.filter(m => calcAgeAt(m.dob, cutoff) === lvl.age);
+    return {
+      age: lvl.age, label: lvl.label,
+      male: c.filter(m => m.gender === 'ប្រុស').length,
+      female: c.filter(m => m.gender === 'ស្រី').length,
+      total: c.length, members: c
+    };
+  });
+  return {cutoff, grouped};
+}
+
+function renderSchoolAgeStats() {
+  const {cutoff, grouped} = getSchoolAgeGroups();
+  const totalChildren = grouped.reduce((s,g) => s + g.total, 0);
+  const cutoffLabel = new Date(cutoff).toLocaleDateString('km-KH', {year:'numeric', month:'long', day:'numeric'});
+
+  const statsGrid = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(200,148,26,0.15)">🎒</div><div><div class="stat-num">${totalChildren}</div><div class="stat-label">កុមារអាយុ ៣-១៧ឆ្នាំសរុប</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(37,99,168,0.12)">👦</div><div><div class="stat-num">${grouped.reduce((s,g)=>s+g.male,0)}</div><div class="stat-label">ប្រុស</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(236,72,153,0.12)">👧</div><div><div class="stat-num">${grouped.reduce((s,g)=>s+g.female,0)}</div><div class="stat-label">ស្រី</div></div></div>
+    </div>
+    <div style="font-size:0.8rem;color:var(--text-muted);margin:4px 0 14px;">
+      គណនាអាយុត្រឹមថ្ងៃទី <strong>${cutoffLabel}</strong> — ក្រុមថ្នាក់ខាងក្រោមផ្អែកលើអាយុគំរូទូទៅ សូមផ្ទៀងផ្ទាត់ជាមួយបទបញ្ជាក់ក្រសួងអប់រំ យុវជន និងកីឡា សម្រាប់ភាពត្រឹមត្រូវផ្លូវការ។
+    </div>`;
+
+  const tableRows = grouped.map(g => `
+    <tr>
+      <td style="font-weight:600">${g.label} <span style="color:var(--text-muted);font-weight:400">(${g.age} ឆ្នាំ)</span></td>
+      <td>${g.male}</td>
+      <td>${g.female}</td>
+      <td style="font-weight:700;color:var(--primary)">${g.total}</td>
+    </tr>`).join('');
+
+  document.getElementById('school-age-stats').innerHTML = statsGrid + `
+    <div class="section-title">ការបែងចែកតាមថ្នាក់ត្រៀមចូលរៀន</div>
+    <div class="age-table-wrap">
+      <table class="age-table">
+        <thead><tr><th>ថ្នាក់ត្រៀមចូលរៀន</th><th>ប្រុស (នាក់)</th><th>ស្រី (នាក់)</th><th>សរុប</th></tr></thead>
+        <tbody>${tableRows || '<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text-muted)">គ្មានទិន្នន័យ</td></tr>'}</tbody>
+      </table>
+    </div>`;
+}
+
+function printSchoolAgeReport() {
+  const {cutoff, grouped} = getSchoolAgeGroups();
+  const cutoffLabel = new Date(cutoff).toLocaleDateString('km-KH', {year:'numeric', month:'long', day:'numeric'});
+  const today = new Date().toLocaleDateString('km-KH', {year:'numeric', month:'long', day:'numeric'});
+  const totalChildren = grouped.reduce((s,g) => s + g.total, 0);
+  const totalMale = grouped.reduce((s,g) => s + g.male, 0);
+  const totalFemale = grouped.reduce((s,g) => s + g.female, 0);
+
+  const sections = grouped.filter(g => g.total > 0).map((g, gi, arr) => {
+    const rows = g.members.map((m, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${m.familyGroup || m.group || '-'}</td>
+        <td>${m.house_code || '-'}</td>
+        <td style="text-align:left;font-weight:600">${m.name || '(គ្មានឈ្មោះ)'}</td>
+        <td>${m.gender || '-'}</td>
+        <td>${m.dob || '-'}</td>
+        <td style="font-weight:700">${g.age} ឆ្នាំ</td>
+      </tr>`).join('');
+    return `
+    <div class="group-section ${gi < arr.length - 1 ? 'page-break' : ''}">
+      <div class="group-title">${g.label} (អាយុ ${g.age} ឆ្នាំ) &nbsp;—&nbsp; ${g.total} នាក់ (ប្រុស ${g.male} / ស្រី ${g.female})</div>
+      <table>
+        <thead>
+          <tr>
+            <th>ល.រ</th><th>លេខក្រុម</th><th>លេខគ្រួសារ</th><th>ឈ្មោះកុមារ</th><th>ភេទ</th><th>ថ្ងៃខែឆ្នាំកំណើត</th><th>អាយុ</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8"/>
+<title>បញ្ជីកុមារអាយុចូលរៀន</title>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Hanuman:wght@400;700&family=Moul&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Kantumruy Pro', 'Hanuman', sans-serif; background: #fff; color: #1a2636; font-size: 12px; }
+  .sheet { width: 210mm; min-height: 297mm; margin: 0 auto; padding: 12mm 14mm; background: #fff; }
+  .kh-header { text-align: center; padding-bottom: 10px; border-bottom: 2.5px solid #1a3a5c; margin-bottom: 12px; }
+  .kh-header .line1 { font-family: 'Moul', serif; font-size: 20px; font-weight: 400; color: #1a2636; letter-spacing: 0.5px; }
+  .kh-header .line2 { font-family: 'Moul', serif; font-size: 15px; font-weight: 400; color: #1a2636; margin-top: 4px; letter-spacing: 0.5px; }
+  .kh-header .line3 { font-size: 15px; font-weight: 900; color: #1a3a5c; margin-top: 7px; }
+  .kh-header .line-admin { font-size: 10.5px; color: #2563a8; font-weight: 600; margin-top: 5px; }
+  .kh-header .line4 { font-size: 10px; color: #555; margin-top: 4px; }
+  .summary-row { display: flex; justify-content: center; gap: 24px; margin: 14px 0 18px; }
+  .summary-box { text-align: center; border: 1.5px solid #c8d4e0; border-radius: 8px; padding: 8px 22px; min-width: 100px; }
+  .summary-box .num { font-size: 18px; font-weight: 900; color: #1a3a5c; }
+  .summary-box .lbl { font-size: 10px; color: #5a7394; margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px; }
+  th { background: #1a3a5c; color: #fff; padding: 7px 8px; text-align: center; font-weight: 700; border: 1px solid #b0c0d0; white-space: nowrap; }
+  td { padding: 5px 8px; border: 1px solid #c8d4e0; text-align: center; vertical-align: middle; }
+  tr:nth-child(even) td { background: #f5f8fc; }
+  .group-title { font-size: 13px; font-weight: 800; color: #1a3a5c; background: #eaf0f7; border: 1px solid #c8d4e0; border-radius: 6px; padding: 7px 14px; margin: 16px 0 6px; }
+  .group-section.page-break { page-break-after: always; }
+  .sig-row { display: flex; justify-content: space-between; margin-top: 18mm; padding: 0 20mm; }
+  .sig-box { text-align: center; min-width: 120px; }
+  .sig-box .sig-title { font-weight: 700; color: #1a3a5c; font-size: 11px; }
+  .sig-box .sig-line { margin-top: 30px; border-top: 1.5px solid #333; padding-top: 4px; font-size: 10px; color: #555; }
+  .sig-box .sig-name-preset { margin-top: 2px; font-size: 10px; font-weight: 700; color: #1a3a5c; }
+  .print-bar { padding: 10px 20px; background: #1a3a5c; display: flex; gap: 10px; position: sticky; top: 0; z-index: 10; }
+  .btn-p { background: #c8941a; color: #fff; border: none; padding: 9px 22px; border-radius: 8px; font-family: 'Kantumruy Pro','Hanuman',sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .btn-cl { background: rgba(255,255,255,0.15); color: #fff; border: 1.5px solid rgba(255,255,255,0.3); padding: 9px 18px; border-radius: 8px; font-family: 'Kantumruy Pro','Hanuman',sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+  @media print {
+    .print-bar { display: none !important; }
+    body { background: #fff; }
+    @page { size: A4 portrait; margin: 8mm 10mm; }
+  }
+</style>
+</head>
+<body>
+<div class="print-bar">
+  <button class="btn-p" onclick="window.print()">🖨️ បោះពុម្ព / PDF</button>
+  <button class="btn-cl" onclick="window.close()">✕ បិទ</button>
+</div>
+<div class="sheet">
+  <div class="kh-header">
+    ${getAdminHeaderHTML('បញ្ជីរាយនាមកុមារត្រៀមចូលរៀន ឆ្នាំសិក្សាបន្តខាងមុខ', 'អាយុគណនាត្រឹមថ្ងៃទី ' + cutoffLabel + ' &nbsp;|&nbsp; ថ្ងៃចេញ: ' + today)}
+  </div>
+  <div class="summary-row">
+    <div class="summary-box"><div class="num">${totalChildren}</div><div class="lbl">កុមារសរុប</div></div>
+    <div class="summary-box"><div class="num">${totalMale}</div><div class="lbl">ប្រុស</div></div>
+    <div class="summary-box"><div class="num">${totalFemale}</div><div class="lbl">ស្រី</div></div>
+  </div>
+  ${sections || '<div style="text-align:center;padding:40px;color:#777;">🎉 គ្មានទិន្នន័យកុមារអាយុចូលរៀន</div>'}
+  ${getSigRowHTML('អ្នកធ្វើរបាយការណ៍')}
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=1100,height=750');
+  if (!win) {
+    showToast('សូមអនុញ្ញាត Popup សម្រាប់គេហទំព័រនេះ ដើម្បីបើករបាយការណ៍', 'warning');
+    return;
+  }
+  win.document.write(html);
+  win.document.close();
+}
+
+// ===== PANELS =====
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  const navEl = document.getElementById('nav-' + name);
+  if (navEl) navEl.classList.add('active');
+
+  if (name === 'school-age') renderSchoolAgeStats();
+  if (name === 'age') renderAgeStats();
+  if (name === 'birth') renderDocStats('birth_cert', ['មាន','គ្មាន','បាត់','ខូច'], 'birth-stats', 'ព័ត៌មានសំបុត្រកំណើត', '📋');
+  if (name === 'id') renderDocStats('national_id', ['មាន','គ្មាន','ផុតកំណត់','បាត់','ខូច'], 'id-stats', 'ព័ត៌មានអត្តសញ្ញាណបណ្ណ', '🪪');
+  if (name === 'family-book') renderDocStats('family_book', ['មាន','គ្មាន','កំពុងធ្វើ','បាត់','ខូច'], 'family-book-stats', 'ព័ត៌មានសៀវភៅគ្រួសារ', '📕');
+  if (name === 'residence') renderDocStats('residence_book', ['មាន','គ្មាន','បាត់','ខូច','កំពុងធ្វើ'], 'residence-stats', 'ព័ត៌មានសៀវភៅស្នាក់នៅ', '📗');
+  if (name === 'migration') renderMigrationStats();
+  if (name === 'search') doSearch();
+}
+
+// ===== MODALS =====
+function openAddFamilyModal() {
+  document.getElementById('new-family-group').value = '';
+  document.getElementById('new-family-count').value = 1;
+  document.getElementById('add-family-modal').classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function addFamily() {
+  familyCounter++;
+  const count = Math.min(15, Math.max(1, parseInt(document.getElementById('new-family-count').value) || 1));
+  const group = document.getElementById('new-family-group').value || ('ក្រុម' + familyCounter);
+  const members = [];
+  for (let i = 0; i < count; i++) {
+    members.push(createEmptyMember(group, i + 1));
+  }
+  families.push({
+    id: 'F' + String(familyCounter).padStart(4, '0'),
+    group,
+    members,
+    photo: {}
+  });
+  save();
+  closeModal('add-family-modal');
+  renderFamilies();
+  updateFamilySummary();
+}
+
+function createEmptyMember(group, num) {
+  return {
+    uid: Date.now() + Math.random(),
+    num,
+    group,
+    house_code: '',
+    name: '',
+    gender: '',
+    dob: '',
+    birthplace: '',
+    occupation: '',
+    currentplace: '',
+    status: '',
+    equity_card: '',
+    birth_cert: '',
+    birth_cert_no: '',
+    birth_cert_img: null,
+    national_id: '',
+    national_id_no: '',
+    national_id_img: null,
+    id_issue_date: '',
+    id_expiry_date: '',
+    family_book: '',
+    family_book_no: '',
+    family_book_img: null,
+    residence_book: '',
+    residence_book_no: '',
+    residence_book_img: null,
+    work_location: '',
+    work_note: '',
+    photo: null,
+  };
+}
+
+// ===== RENDER FAMILIES =====
+function renderFamilies() {
+  const el = document.getElementById('family-list');
+  if (families.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">👨‍👩‍👧‍👦</div><p>មិនទាន់មានគ្រួសារណាមួយទេ។ ចុចប៊ូតុង "បន្ថែមគ្រួសារថ្មី" ខាងលើ។</p></div>`;
+    return;
+  }
+  el.innerHTML = families.map((f, fi) => renderFamilyCard(f, fi)).join('');
+}
+
+function renderFamilyCard(f, fi) {
+  return `
+  <div class="family-card" id="family-card-${fi}">
+    <div class="family-card-header">
+      <span class="family-code">${f.id}</span>
+      <span class="family-card-header-title">ក្រុម: ${f.group}</span>
+      <span style="color:var(--text-muted);font-size:0.82rem">សមាជិក: ${f.members.length} នាក់</span>
+      <div class="family-actions">
+        <button class="btn-sm btn-accent-sm" onclick="addMemberToFamily(${fi})">+ សមាជិក</button>
+        <button class="btn-sm btn-save-sm" id="save-btn-${fi}" onclick="saveFamily(${fi})">💾 រក្សាទុក</button>
+        <button class="btn-sm btn-danger-sm" onclick="deleteFamily(${fi})">🗑 លុប</button>
+      </div>
+    </div>
+    <div class="scroll-hint">← រំកិលផ្ដេកដើម្បីមើលព័ត៌មានទាំងអស់ →</div>
+    <div class="member-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>រូបថត</th>
+            <th>កូដគ្រួសារ/ខ្នងផ្ទះ</th>
+            <th>ឈ្មោះក្រុម</th>
+            <th>ល.រ</th>
+            <th>គោត្តនាម និងនាម</th>
+            <th>ភេទ</th>
+            <th>ថ្ងៃខែឆ្នាំ</th>
+            <th>អាយុ</th>
+            <th>ទីកំណើត</th>
+            <th>មុខរបរ</th>
+            <th>ទីកន្លែងបច្ចុប្បន្ន</th>
+            <th>ស្ថានភាពគ្រួសារ</th>
+            <th>បណ្ណសមធម៌</th>
+            <th>តួលេខ (សំបុត្រ)</th>
+            <th>សំបុត្រកំណើត</th>
+            <th>រូបភាព (សំបុត្រ)</th>
+            <th>តួលេខ (អត្តសញ្ញាណ)</th>
+            <th>អត្តសញ្ញាណបណ្ណ</th>
+            <th>រូបភាព (អត្តសញ្ញាណ)</th>
+            <th>ថ្ងៃខែឆ្នាំផលិត</th>
+            <th>ថ្ងៃខែឆ្នាំផុតកំណត់</th>
+            <th>តួលេខ (សៀវភៅគ្រួសារ)</th>
+            <th>សៀវភៅគ្រួសារ</th>
+            <th>រូបភាព (សៀវភៅគ្រួសារ)</th>
+            <th>តួលេខ (សៀវភៅស្នាក់នៅ)</th>
+            <th>សៀវភៅស្នាក់នៅ</th>
+            <th>រូបភាព (សៀវភៅស្នាក់នៅ)</th>
+            <th>កន្លែងធ្វើការ</th>
+            <th>ចំណាំ(ប្រទេស)</th>
+            <th>សកម្មភាព</th>
+          </tr>
+        </thead>
+        <tbody id="members-${fi}">
+          ${f.members.map((m, mi) => renderMemberRow(m, fi, mi)).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderMemberRow(m, fi, mi) {
+  const age = calcAge(m.dob);
+  const photoHtml = m.photo
+    ? `<img src="${m.photo}" class="avatar-cell" onclick="triggerPhotoUpload(${fi},${mi})" style="cursor:pointer" title="ប្ដូររូប"/>`
+    : `<button class="photo-upload-btn" onclick="triggerPhotoUpload(${fi},${mi})" title="ផ្ទុករូប">📷</button>`;
+  
+  const provinceOptions = PROVINCES.map(p => `<option value="${p}" ${m.work_location===p?'selected':''}>${p}</option>`).join('');
+  const showNote = m.work_location === 'ក្រៅប្រទេស';
+  
+  return `
+  <tr id="member-row-${fi}-${mi}">
+    <td>${mi+1}</td>
+    <td>
+      ${photoHtml}
+      <input type="file" id="photo-input-${fi}-${mi}" accept="image/*" style="display:none" onchange="handlePhotoUpload(${fi},${mi},this)"/>
+    </td>
+    <td><input type="text" value="${esc(m.house_code||'')}" style="width:110px" placeholder="កូដ..." onchange="updateMember(${fi},${mi},'house_code',this.value)"/></td>
+    <td><input type="text" value="${esc(m.group)}" style="width:90px" onchange="updateMember(${fi},${mi},'group',this.value)"/></td>
+    <td style="font-weight:700;color:var(--primary)">${m.num}</td>
+    <td><input type="text" value="${esc(m.name)}" style="width:130px" placeholder="ឈ្មោះ..." onchange="updateMember(${fi},${mi},'name',this.value)"/></td>
+    <td>
+      <select style="width:70px" onchange="updateMember(${fi},${mi},'gender',this.value)">
+        <option value="">-</option>
+        <option value="ប្រុស" ${m.gender==='ប្រុស'?'selected':''}>ប្រុស</option>
+        <option value="ស្រី" ${m.gender==='ស្រី'?'selected':''}>ស្រី</option>
+      </select>
+    </td>
+    <td><input type="date" value="${m.dob||''}" style="width:130px" onchange="updateMember(${fi},${mi},'dob',this.value)"/></td>
+    <td style="font-weight:700;color:var(--primary-light)">${age}</td>
+    <td><input type="text" value="${esc(m.birthplace)}" style="width:110px" placeholder="ទីកំណើត..." onchange="updateMember(${fi},${mi},'birthplace',this.value)"/></td>
+    <td><input type="text" value="${esc(m.occupation)}" style="width:100px" placeholder="មុខរបរ..." onchange="updateMember(${fi},${mi},'occupation',this.value)"/></td>
+    <td><input type="text" value="${esc(m.currentplace)}" style="width:110px" placeholder="ទីកន្លែង..." onchange="updateMember(${fi},${mi},'currentplace',this.value)"/></td>
+    <td>
+      <select style="width:90px" onchange="updateMemberStatus(${fi},${mi},this.value)">
+        <option value="">-</option>
+        <option value="ក្រ១" ${m.status==='ក្រ១'?'selected':''}>ក្រ១</option>
+        <option value="ក្រ២" ${m.status==='ក្រ២'?'selected':''}>ក្រ២</option>
+        <option value="ក្រ៣" ${m.status==='ក្រ៣'?'selected':''}>ក្រ៣</option>
+        <option value="ធម្មតា" ${m.status==='ធម្មតា'?'selected':''}>ធម្មតា</option>
+      </select>
+    </td>
+    <td><input type="text" value="${esc(m.equity_card)}" style="width:90px" placeholder="លេខបណ្ណ..." onchange="updateMember(${fi},${mi},'equity_card',this.value)" ${!['ក្រ១','ក្រ២','ក្រ៣'].includes(m.status)?'disabled':''}/></td>
+    <td><input type="text" value="${esc(m.birth_cert_no||'')}" style="width:110px" placeholder="តួលេខ..." onchange="updateMember(${fi},${mi},'birth_cert_no',this.value)"/></td>
+    <td>${docSelect(fi,mi,'birth_cert',m.birth_cert,['មាន','គ្មាន','បាត់','ខូច'])}</td>
+    <td>${docImgHtml(fi,mi,'birth_cert_img',m.birth_cert_img)}</td>
+    <td><input type="text" value="${esc(m.national_id_no||'')}" style="width:110px" placeholder="តួលេខ..." onchange="updateMember(${fi},${mi},'national_id_no',this.value)"/></td>
+    <td>${docSelect(fi,mi,'national_id',m.national_id,['មាន','គ្មាន','ផុតកំណត់','បាត់','ខូច'])}</td>
+    <td>${docImgHtml(fi,mi,'national_id_img',m.national_id_img)}</td>
+    <td><input type="date" value="${m.id_issue_date||''}" style="width:130px" onchange="updateMember(${fi},${mi},'id_issue_date',this.value)"/></td>
+    <td><input type="date" value="${m.id_expiry_date||''}" style="width:130px" onchange="updateMember(${fi},${mi},'id_expiry_date',this.value)"/></td>
+    <td><input type="text" value="${esc(m.family_book_no||'')}" style="width:110px" placeholder="តួលេខ..." onchange="updateMember(${fi},${mi},'family_book_no',this.value)"/></td>
+    <td>${docSelect(fi,mi,'family_book',m.family_book,['មាន','គ្មាន','កំពុងធ្វើ','បាត់','ខូច'])}</td>
+    <td>${docImgHtml(fi,mi,'family_book_img',m.family_book_img)}</td>
+    <td><input type="text" value="${esc(m.residence_book_no||'')}" style="width:110px" placeholder="តួលេខ..." onchange="updateMember(${fi},${mi},'residence_book_no',this.value)"/></td>
+    <td>${docSelect(fi,mi,'residence_book',m.residence_book,['មាន','គ្មាន','បាត់','ខូច','កំពុងធ្វើ'])}</td>
+    <td>${docImgHtml(fi,mi,'residence_book_img',m.residence_book_img)}</td>
+    <td>
+      <select style="width:120px" onchange="updateWorkLocation(${fi},${mi},this.value)">
+        <option value="">-</option>
+        <option value="ក្នុងភូមិ" ${m.work_location==='ក្នុងភូមិ'?'selected':''}>ក្នុងភូមិ</option>
+        ${provinceOptions}
+        <option value="ក្រៅប្រទេស" ${m.work_location==='ក្រៅប្រទេស'?'selected':''}>ក្រៅប្រទេស</option>
+      </select>
+    </td>
+    <td><input type="text" value="${esc(m.work_note)}" style="width:100px" placeholder="${showNote?'ឈ្មោះប្រទេស...':''}" ${!showNote?'disabled':''} onchange="updateMember(${fi},${mi},'work_note',this.value)"/></td>
+    <td><button class="btn-sm btn-danger-sm" onclick="deleteMember(${fi},${mi})">✕</button></td>
+  </tr>`;
+}
+
+function docSelect(fi, mi, key, val, opts) {
+  return `<select style="width:90px" onchange="updateMember(${fi},${mi},'${key}',this.value)">
+    <option value="">-</option>
+    ${opts.map(o=>`<option value="${o}" ${val===o?'selected':''}>${o}</option>`).join('')}
+  </select>`;
+}
+
+function docImgHtml(fi, mi, key, val) {
+  const inputId = `doc-img-input-${fi}-${mi}-${key}`;
+  const imgHtml = val
+    ? `<img src="${val}" class="doc-img-thumb" onclick="document.getElementById('${inputId}').click()" title="ចុចដើម្បីប្ដូររូប"/>`
+    : `<button class="doc-img-btn" onclick="document.getElementById('${inputId}').click()" title="ផ្ទុករូបភាពឯកសារ">🖼️</button>`;
+  return `<div style="text-align:center">
+    ${imgHtml}
+    <input type="file" id="${inputId}" accept="image/*" style="display:none" onchange="handleDocImgUpload(${fi},${mi},'${key}',this)"/>
+    ${val ? `<div style="font-size:0.68rem;color:var(--danger);cursor:pointer;margin-top:2px" onclick="removeDocImg(${fi},${mi},'${key}')">✕ លុប</div>` : ''}
+  </div>`;
+}
+
+function esc(s) {
+  if (!s) return '';
+  return s.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ===== UPDATE =====
+function updateMember(fi, mi, key, value) {
+  families[fi].members[mi][key] = value;
+  save();
+  if (key === 'dob') refreshAge(fi, mi);
+}
+
+function updateMemberStatus(fi, mi, value) {
+  families[fi].members[mi].status = value;
+  save();
+  // Re-render just that row
+  const tbody = document.getElementById('members-' + fi);
+  if (tbody) {
+    const rows = tbody.querySelectorAll('tr');
+    if (rows[mi]) {
+      rows[mi].outerHTML = renderMemberRow(families[fi].members[mi], fi, mi);
+    }
+  }
+}
+
+function updateWorkLocation(fi, mi, value) {
+  families[fi].members[mi].work_location = value;
+  if (value !== 'ក្រៅប្រទេស') families[fi].members[mi].work_note = '';
+  save();
+  const tbody = document.getElementById('members-' + fi);
+  if (tbody) {
+    const rows = tbody.querySelectorAll('tr');
+    if (rows[mi]) {
+      rows[mi].outerHTML = renderMemberRow(families[fi].members[mi], fi, mi);
+    }
+  }
+}
+
+function refreshAge(fi, mi) {
+  const age = calcAge(families[fi].members[mi].dob);
+  const row = document.getElementById(`member-row-${fi}-${mi}`);
+  if (row) {
+    const cells = row.querySelectorAll('td');
+    if (cells[8]) cells[8].innerHTML = `<span style="font-weight:700;color:var(--primary-light)">${age}</span>`;
+  }
+}
+
+function addMemberToFamily(fi) {
+  if (families[fi].members.length >= 15) {
+    alert('អតិបរមា ១៥ នាក់ក្នុងគ្រួសារ');
+    return;
+  }
+  const num = families[fi].members.length + 1;
+  families[fi].members.push(createEmptyMember(families[fi].group, num));
+  save();
+  renderFamilies();
+}
+
+function deleteMember(fi, mi) {
+  if (!confirm('លុបសមាជិកនេះ?')) return;
+  families[fi].members.splice(mi, 1);
+  // Renumber
+  families[fi].members.forEach((m, i) => m.num = i + 1);
+  save();
+  renderFamilies();
+}
+
+function deleteFamily(fi) {
+  if (!confirm('លុបគ្រួសារ ' + families[fi].id + '?')) return;
+  families.splice(fi, 1);
+  save();
+  renderFamilies();
+  updateFamilySummary();
+}
+
+// ===== PHOTO =====
+function triggerPhotoUpload(fi, mi) {
+  document.getElementById(`photo-input-${fi}-${mi}`).click();
+}
+
+function handlePhotoUpload(fi, mi, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    families[fi].members[mi].photo = e.target.result;
+    save();
+    const rowEl = document.getElementById(`member-row-${fi}-${mi}`);
+    if (rowEl) rowEl.outerHTML = renderMemberRow(families[fi].members[mi], fi, mi);
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleDocImgUpload(fi, mi, key, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    families[fi].members[mi][key] = e.target.result;
+    save();
+    const rowEl = document.getElementById(`member-row-${fi}-${mi}`);
+    if (rowEl) rowEl.outerHTML = renderMemberRow(families[fi].members[mi], fi, mi);
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeDocImg(fi, mi, key) {
+  families[fi].members[mi][key] = null;
+  save();
+  const rowEl = document.getElementById(`member-row-${fi}-${mi}`);
+  if (rowEl) rowEl.outerHTML = renderMemberRow(families[fi].members[mi], fi, mi);
+}
+
+// ===== SUMMARY =====
+function updateFamilySummary() {
+  const all = getAllMembers();
+  const el = document.getElementById('family-summary');
+  el.innerHTML = `
+    <div class="info-chip"><span class="dot"></span>គ្រួសារ: ${families.length}</div>
+    <div class="info-chip"><span class="dot"></span>ប្រជាជន: ${all.length} នាក់</div>
+    <div class="info-chip"><span class="dot"></span>ប្រុស: ${all.filter(m=>m.gender==='ប្រុស').length}</div>
+    <div class="info-chip"><span class="dot"></span>ស្រី: ${all.filter(m=>m.gender==='ស្រី').length}</div>
+  `;
+}
+
+// ===== GET ALL MEMBERS =====
+function getAllMembers() {
+  return families.flatMap((f, fi) => f.members.map((m, mi) => ({...m, familyId: f.id, familyGroup: f.group, fi, mi})));
+}
+
+// ===== SEARCH =====
+let searchResults = [];
+let searchPersonResult = null;
+
+function doSearch() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const all = getAllMembers();
+  if (!q) {
+    searchResults = [];
+    searchPersonResult = null;
+    document.getElementById('search-results').innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>វាយឈ្មោះ ឬលេខកូដ ដើម្បីស្វែងរក</p></div>';
+    return;
+  }
+  searchResults = all.filter(m =>
+    (m.name||'').toLowerCase().includes(q) ||
+    (m.familyId||'').toLowerCase().includes(q) ||
+    (m.familyGroup||'').toLowerCase().includes(q) ||
+    (m.house_code||'').toLowerCase().includes(q) ||
+    (m.occupation||'').toLowerCase().includes(q)
+  );
+  searchPersonResult = searchResults[0] || null;
+  renderSearchResults();
+}
+
+function renderSearchResults() {
+  const el = document.getElementById('search-results');
+  if (searchResults.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">😔</div><p>រកមិនឃើញ</p></div>';
+    return;
+  }
+  el.innerHTML = `
+    <div class="age-table-wrap">
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:12px">រកឃើញ ${searchResults.length} លទ្ធផល</p>
+      <table class="age-table" style="min-width:700px">
+        <thead><tr>
+          <th>រូបថត</th><th>កូដគ្រួសារ/ខ្នងផ្ទះ</th><th>ឈ្មោះក្រុម</th><th>ល.រ</th><th>ឈ្មោះ</th><th>ភេទ</th>
+          <th>ថ្ងៃខែឆ្នាំ</th><th>អាយុ</th><th>ស្ថានភាព</th><th>លេខកូដ</th>
+        </tr></thead>
+        <tbody>
+          ${searchResults.map((m, i) => `
+          <tr class="${i===0?'search-result-highlight':''}" onclick="selectSearchResult(${i})" style="cursor:pointer" title="ចុចដើម្បីជ្រើស">
+            <td>${m.photo?`<img src="${m.photo}" class="avatar-cell"/>`:`<div class="avatar-placeholder">👤</div>`}</td>
+            <td>${m.house_code||'-'}</td>
+            <td>${m.familyGroup||'-'}</td>
+            <td>${m.num||'-'}</td>
+            <td style="font-weight:700">${m.name||'-'}</td>
+            <td>${m.gender||'-'}</td>
+            <td>${m.dob||'-'}</td>
+            <td>${calcAge(m.dob)||'-'}</td>
+            <td>${statusBadge(m.status)}</td>
+            <td><span class="family-code">${m.familyId}</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function selectSearchResult(i) {
+  searchPersonResult = searchResults[i];
+  // Highlight selected
+  document.querySelectorAll('#search-results tbody tr').forEach((r, ri) => {
+    r.classList.toggle('search-result-highlight', ri === i);
+  });
+}
+
+function statusBadge(s) {
+  const map = {'ក្រ១':'badge-poor1','ក្រ២':'badge-poor2','ក្រ៣':'badge-poor3','ធម្មតា':'badge-normal'};
+  if (!s) return '-';
+  return `<span class="badge ${map[s]||''}">${s}</span>`;
+}
+
+// ===== PDF =====
+function downloadPDFPerson() {
+  if (!searchPersonResult) { alert('សូមស្វែងរក ហើយជ្រើសបុគ្គលមុន'); return; }
+  openPrintWindow([searchPersonResult], false);
+}
+
+function downloadPDFFamily() {
+  if (!searchPersonResult) { alert('សូមស្វែងរក ហើយជ្រើសបុគ្គលមុន'); return; }
+  const houseCode = (searchPersonResult.house_code || '').trim();
+  if (!houseCode) {
+    alert('បុគ្គលដែលជ្រើសរើសមិនមានកូដគ្រួសារ/ខ្នងផ្ទះ។ សូមបំពេញទិន្នន័យជាមុន។');
+    return;
+  }
+  // Collect all members with the same house_code across all families
+  const allMembers = getAllMembers();
+  const members = allMembers.filter(m => (m.house_code || '').trim() === houseCode);
+  if (members.length === 0) {
+    alert('រកមិនឃើញសមាជិកដែលមានកូដ: ' + houseCode);
+    return;
+  }
+  const fam = families[searchPersonResult.fi];
+  openPrintWindow(members, { id: houseCode, group: houseCode });
+}
+
+function downloadPDFGroup() {
+  if (!searchPersonResult) { alert('សូមស្វែងរក ហើយជ្រើសបុគ្គលមុន'); return; }
+  const groupName = (searchPersonResult.familyGroup || '').trim();
+  if (!groupName) {
+    alert('បុគ្គលដែលជ្រើសរើសមិនមានឈ្មោះក្រុម។ សូមបំពេញទិន្នន័យជាមុន។');
+    return;
+  }
+  const allMembers = getAllMembers();
+  const members = allMembers.filter(m => (m.familyGroup || '').trim() === groupName || (m.group || '').trim() === groupName);
+  if (members.length === 0) {
+    alert('រកមិនឃើញសមាជិកដែលមានឈ្មោះក្រុម: ' + groupName);
+    return;
+  }
+  openPrintWindow(members, { id: groupName, group: groupName });
+}
+
+function getWorkLocationDisplay(m) {
+  if (!m.work_location) return '-';
+  if (m.work_location === 'ក្រៅប្រទេស') {
+    return 'ក្រៅប្រទេស' + (m.work_note ? ' (' + m.work_note + ')' : '');
+  }
+  return m.work_location;
+}
+
+function openPrintWindow(members, fam) {
+  const famId = fam ? fam.id : (members[0]?.familyId || '');
+  const famGroup = fam ? fam.group : (members[0]?.familyGroup || '');
+  const today = new Date().toLocaleDateString('km-KH', {year:'numeric', month:'long', day:'numeric'});
+
+  const memberCards = members.map((m, idx) => {
+    const age = calcAge(m.dob) || '-';
+    const photoHtml = m.photo
+      ? `<img src="${m.photo}" class="p-photo" alt="រូបថត"/>`
+      : `<div class="p-photo p-no-photo">👤</div>`;
+
+    const workLoc = getWorkLocationDisplay(m);
+    const statusClass = {'ក្រ១':'s-poor1','ក្រ២':'s-poor2','ក្រ៣':'s-poor3','ធម្មតា':'s-normal'}[m.status] || '';
+
+    return `
+    <div class="member-card ${idx > 0 ? 'page-break' : ''}">
+      <div class="card-header-bar">
+        <span class="card-fid">${m.familyId || famId}</span>
+        <span class="card-num">ល.រ ${m.num || (idx+1)}</span>
+      </div>
+      <div class="card-body">
+        <div class="photo-col">
+          ${photoHtml}
+          <div class="name-under">${m.name || '(គ្មានឈ្មោះ)'}</div>
+          <div class="group-under">${m.familyGroup || famGroup}</div>
+          <div class="house-code-label">កូដគ្រួសារ/ខ្នងផ្ទះ</div>
+          <div class="house-code-under">${m.house_code || '-'}</div>
+        </div>
+        <div class="info-col">
+          <div class="info-grid">
+            <div class="info-row-item">
+              <span class="lbl">ភេទ</span>
+              <span class="val">${m.gender || '-'}</span>
+            </div>
+            <div class="info-row-item">
+              <span class="lbl">ថ្ងៃខែឆ្នាំកំណើត</span>
+              <span class="val">${m.dob || '-'}</span>
+            </div>
+            <div class="info-row-item">
+              <span class="lbl">អាយុ</span>
+              <span class="val age-val">${age}</span>
+            </div>
+            <div class="info-row-item">
+              <span class="lbl">ទីកន្លែងកំណើត</span>
+              <span class="val">${m.birthplace || '-'}</span>
+            </div>
+            <div class="info-row-item">
+              <span class="lbl">មុខរបរ</span>
+              <span class="val">${m.occupation || '-'}</span>
+            </div>
+            <div class="info-row-item">
+              <span class="lbl">ទីកន្លែងបច្ចុប្បន្ន</span>
+              <span class="val">${m.currentplace || '-'}</span>
+            </div>
+            <div class="info-row-item">
+              <span class="lbl">ស្ថានភាពគ្រួសារ</span>
+              <span class="val ${statusClass}">${m.status || '-'}${m.equity_card ? ' &nbsp;|&nbsp; បណ្ណ: ' + m.equity_card : ''}</span>
+            </div>
+            <div class="info-row-item">
+              <span class="lbl">កន្លែងធ្វើការបច្ចុប្បន្ន</span>
+              <span class="val work-loc">${workLoc}</span>
+            </div>
+          </div>
+          <div class="doc-row">
+            <div class="doc-item">
+              <div class="doc-lbl">សំបុត្រកំណើត</div>
+              <div class="doc-val">${m.birth_cert || '-'}</div>
+              ${m.birth_cert_no ? `<div class="doc-no">${m.birth_cert_no}</div>` : ''}
+              ${m.birth_cert_img ? `<img src="${m.birth_cert_img}" class="doc-img-preview"/>` : ''}
+            </div>
+            <div class="doc-item">
+              <div class="doc-lbl">អត្តសញ្ញាណបណ្ណ</div>
+              <div class="doc-val">${m.national_id || '-'}</div>
+              ${m.national_id_no ? `<div class="doc-no">${m.national_id_no}</div>` : ''}
+              ${m.national_id_img ? `<img src="${m.national_id_img}" class="doc-img-preview"/>` : ''}
+            </div>
+            <div class="doc-item">
+              <div class="doc-lbl">សៀវភៅគ្រួសារ</div>
+              <div class="doc-val">${m.family_book || '-'}</div>
+              ${m.family_book_no ? `<div class="doc-no">${m.family_book_no}</div>` : ''}
+              ${m.family_book_img ? `<img src="${m.family_book_img}" class="doc-img-preview"/>` : ''}
+            </div>
+            <div class="doc-item">
+              <div class="doc-lbl">សៀវភៅស្នាក់នៅ</div>
+              <div class="doc-val">${m.residence_book || '-'}</div>
+              ${m.residence_book_no ? `<div class="doc-no">${m.residence_book_no}</div>` : ''}
+              ${m.residence_book_img ? `<img src="${m.residence_book_img}" class="doc-img-preview"/>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8"/>
+<title>ព័ត៌មានប្រជាជន - ${famId}</title>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Hanuman:wght@400;700&family=Moul&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Kantumruy Pro', 'Hanuman', sans-serif;
+    background: #f0f4f8;
+    color: #1a2636;
+    font-size: 13px;
+  }
+  .print-header {
+    background: linear-gradient(135deg, #1a3a5c 0%, #0f2740 100%);
+    color: #fff;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .print-header-title { font-size: 1.15rem; font-weight: 700; }
+  .print-header-sub { font-size: 0.78rem; color: rgba(255,255,255,0.65); margin-top: 3px; }
+  .print-header-meta { text-align: right; font-size: 0.8rem; color: rgba(255,255,255,0.75); }
+  .print-header-meta strong { color: #f0b429; font-size: 1rem; }
+
+  .container { max-width: 780px; margin: 0 auto; padding: 0 20px 40px; }
+
+  .member-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(26,58,92,0.10);
+    border: 1.5px solid #d0dce8;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .card-header-bar {
+    background: linear-gradient(90deg, rgba(26,58,92,0.08), rgba(200,148,26,0.07));
+    border-bottom: 1.5px solid #d0dce8;
+    padding: 9px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-fid {
+    background: linear-gradient(135deg, #1a3a5c, #2563a8);
+    color: #fff;
+    padding: 3px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .card-num {
+    font-size: 0.82rem;
+    color: #5a7394;
+    font-weight: 600;
+  }
+  .card-body {
+    display: flex;
+    gap: 0;
+  }
+  .photo-col {
+    width: 130px;
+    flex-shrink: 0;
+    padding: 20px 16px;
+    border-right: 1.5px solid #e8eef5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(26,58,92,0.025);
+  }
+  .p-photo {
+    width: 88px; height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #d0dce8;
+    box-shadow: 0 2px 10px rgba(26,58,92,0.12);
+  }
+  .p-no-photo {
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #cdd8e8, #a8bcd0);
+    font-size: 2.5rem;
+    color: #5a7394;
+    border-radius: 8px;
+    border: 2px solid #d0dce8;
+  }
+  .name-under {
+    margin-top: 10px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: #1a3a5c;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .group-under {
+    margin-top: 4px;
+    font-size: 0.75rem;
+    color: #5a7394;
+    text-align: center;
+  }
+  .house-code-label {
+    margin-top: 8px;
+    font-size: 0.65rem;
+    color: #8a9ab0;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  .house-code-under {
+    margin-top: 3px;
+    font-size: 0.78rem;
+    color: #7c3aed;
+    font-weight: 700;
+    text-align: center;
+    background: rgba(124,58,237,0.08);
+    border-radius: 6px;
+    padding: 3px 8px;
+  }
+  .info-col {
+    flex: 1;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+  }
+  .info-row-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .lbl {
+    font-size: 0.70rem;
+    color: #8a9ab0;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .val {
+    font-size: 0.88rem;
+    color: #1a2636;
+    font-weight: 500;
+  }
+  .age-val { font-weight: 800; color: #2563a8; font-size: 1rem; }
+  .work-loc { color: #7c3aed; font-weight: 600; }
+  .s-poor1 { color: #b91c1c; font-weight: 700; }
+  .s-poor2 { color: #c2410c; font-weight: 700; }
+  .s-poor3 { color: #a16207; font-weight: 700; }
+  .s-normal { color: #15803d; font-weight: 700; }
+
+  .doc-row {
+    display: flex;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid #e8eef5;
+  }
+  .doc-item {
+    flex: 1;
+    background: rgba(26,58,92,0.04);
+    border-radius: 8px;
+    padding: 8px 10px;
+    text-align: center;
+    border: 1px solid #e0eaf4;
+  }
+  .doc-lbl {
+    font-size: 0.68rem;
+    color: #8a9ab0;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .doc-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1a3a5c;
+  }
+  .doc-no {
+    font-size: 0.75rem;
+    color: #2563a8;
+    font-weight: 600;
+    margin-top: 3px;
+  }
+  .doc-img-preview {
+    width: 100%;
+    max-height: 90px;
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid #d0dce8;
+    margin-top: 6px;
+  }
+
+  .print-footer {
+    text-align: center;
+    color: #8a9ab0;
+    font-size: 0.75rem;
+    padding: 16px;
+    border-top: 1px solid #d0dce8;
+    margin-top: 8px;
+  }
+
+  .btn-print-wrap {
+    text-align: center;
+    padding: 20px 0 8px;
+  }
+  .btn-print {
+    background: linear-gradient(135deg, #1a3a5c, #2563a8);
+    color: #fff;
+    border: none;
+    padding: 12px 36px;
+    border-radius: 10px;
+    font-family: 'Kantumruy Pro', 'Hanuman', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(26,58,92,0.25);
+    margin-right: 12px;
+  }
+  .btn-close {
+    background: #e8eef5;
+    color: #1a3a5c;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-family: 'Kantumruy Pro', 'Hanuman', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .page-break { page-break-before: always; }
+
+  @media print {
+    body { background: #fff; }
+    .btn-print-wrap { display: none; }
+    .print-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card-fid { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .member-card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+    @page { size: A4; margin: 10mm 12mm; }
+  }
+</style>
+</head>
+<body>
+<div class="print-header">
+  <div>
+    <div class="print-header-title">🏘️ ប្រព័ន្ធគ្រប់គ្រងប្រជាជនភូមិ</div>
+    <div class="print-header-sub">Village Population Management System</div>
+  </div>
+  <div class="print-header-meta">
+    <div>លេខកូដ/ក្រុម: <strong>${famGroup || famId}</strong></div>
+    <div>ចំនួនសមាជិក: <strong>${members.length} នាក់</strong></div>
+    <div>ថ្ងៃបង្ហាញ: ${today}</div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="btn-print-wrap">
+    <button class="btn-print" onclick="window.print()">🖨️ បោះពុម្ព / រក្សាទុកជា PDF</button>
+    <button class="btn-close" onclick="window.close()">✕ បិទ</button>
+  </div>
+  ${memberCards}
+  <div class="print-footer">
+    ព័ត៌មានរក្សាជាសម្ងាត់ · ប្រព័ន្ធគ្រប់គ្រងប្រជាជនភូមិ · ${today}
+  </div>
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=900,height=700');
+  if (!win) {
+    showToast('សូមអនុញ្ញាត Popup សម្រាប់គេហទំព័រនេះ ដើម្បីបើករបាយការណ៍', 'warning');
+    return;
+  }
+  win.document.write(html);
+  win.document.close();
+}
+
+// ===== STATS =====
+function renderAgeStats() {
+  const all = getAllMembers().filter(m => m.dob);
+  const ageGroups = [
+    {label:'0ឆ្នាំ (3ថ្ងៃ-<12ខែ)', min:0, max:0, label2:'<1 ឆ្នាំ'},
+    ...Array.from({length:90}, (_,i) => ({label: (i+1)+'ឆ្នាំ', min:i+1, max:i+1}))
+  ];
+
+  const counts = ageGroups.map(g => {
+    const c = all.filter(m => {
+      const a = calcAgeNum(m.dob);
+      if (g.min === 0 && g.max === 0) return a === 0;
+      return a === g.min;
+    });
+    return {label: g.label, male: c.filter(m=>m.gender==='ប្រុស').length, female: c.filter(m=>m.gender==='ស្រី').length, total: c.length};
+  }).filter(g => g.total > 0);
+
+  const total = all.length || 1;
+
+  const statsGrid = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(37,99,168,0.12)">👥</div><div><div class="stat-num">${all.length}</div><div class="stat-label">ប្រជាជន (មានថ្ងៃ)</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(37,99,168,0.12)">👨</div><div><div class="stat-num">${all.filter(m=>m.gender==='ប្រុស').length}</div><div class="stat-label">ប្រជាជនប្រុស</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(236,72,153,0.12)">👩</div><div><div class="stat-num">${all.filter(m=>m.gender==='ស្រី').length}</div><div class="stat-label">ប្រជាជនស្រី</div></div></div>
+    </div>`;
+
+  const tableRows = counts.map(g => `
+    <tr>
+      <td style="font-weight:600">${g.label}</td>
+      <td>${g.male}</td>
+      <td>${g.female}</td>
+      <td style="font-weight:700;color:var(--primary)">${g.total}</td>
+      <td>
+        <span class="pct-bar" style="width:${Math.round(g.total/total*100)}px"></span>
+        ${(g.total/total*100).toFixed(1)}%
+      </td>
+    </tr>`).join('');
+
+  document.getElementById('age-stats').innerHTML = statsGrid + `
+    <div class="section-title">ការបែងចែកតាមអាយុ</div>
+    <div class="age-table-wrap">
+      <table class="age-table">
+        <thead><tr><th>ក្រុមអាយុ</th><th>ប្រុស (នាក់)</th><th>ស្រី (នាក់)</th><th>សរុប</th><th>ភាគរយ</th></tr></thead>
+        <tbody>${tableRows || '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted)">គ្មានទិន្នន័យ</td></tr>'}</tbody>
+      </table>
+    </div>`;
+}
+
+function printAgeReport() {
+  const all = getAllMembers().filter(m => m.dob);
+  const ageGroups = [
+    {label:'0ឆ្នាំ (3ថ្ងៃ-<12ខែ)', min:0, max:0},
+    ...Array.from({length:90}, (_,i) => ({label: (i+1)+'ឆ្នាំ', min:i+1, max:i+1}))
+  ];
+
+  const counts = ageGroups.map(g => {
+    const c = all.filter(m => {
+      const a = calcAgeNum(m.dob);
+      if (g.min === 0 && g.max === 0) return a === 0;
+      return a === g.min;
+    });
+    return {label: g.label, male: c.filter(m=>m.gender==='ប្រុស').length, female: c.filter(m=>m.gender==='ស្រី').length, total: c.length};
+  }).filter(g => g.total > 0);
+
+  const totalAll = all.length || 1;
+  const totalMale = all.filter(m=>m.gender==='ប្រុស').length;
+  const totalFemale = all.filter(m=>m.gender==='ស្រី').length;
+  const today = new Date().toLocaleDateString('km-KH', {year:'numeric', month:'long', day:'numeric'});
+
+  let rows = '';
+  if (counts.length === 0) {
+    rows = `<tr><td colspan="5" style="text-align:center;padding:40px;color:#777;">🎉 គ្មានទិន្នន័យ</td></tr>`;
+  } else {
+    counts.forEach(g => {
+      rows += `<tr>
+        <td style="font-weight:600">${g.label}</td>
+        <td>${g.male}</td>
+        <td>${g.female}</td>
+        <td style="font-weight:700">${g.total}</td>
+        <td>${(g.total/totalAll*100).toFixed(1)}%</td>
+      </tr>`;
+    });
+  }
+
+  const html = `<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8"/>
+<title>របាយការណ៍ចំនួនប្រជាជនតាមអាយុ</title>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Hanuman:wght@400;700&family=Moul&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Kantumruy Pro', 'Hanuman', sans-serif; background: #fff; color: #1a2636; font-size: 12px; }
+  .sheet { width: 210mm; min-height: 297mm; margin: 0 auto; padding: 12mm 14mm; background: #fff; }
+  .kh-header { text-align: center; padding-bottom: 10px; border-bottom: 2.5px solid #1a3a5c; margin-bottom: 12px; }
+  .kh-header .line1 { font-family: 'Moul', serif; font-size: 20px; font-weight: 400; color: #1a2636; letter-spacing: 0.5px; }
+  .kh-header .line2 { font-family: 'Moul', serif; font-size: 15px; font-weight: 400; color: #1a2636; margin-top: 4px; letter-spacing: 0.5px; }
+  .kh-header .line3 { font-size: 15px; font-weight: 900; color: #1a3a5c; margin-top: 7px; }
+  .kh-header .line-admin { font-size: 10.5px; color: #2563a8; font-weight: 600; margin-top: 5px; }
+  .kh-header .line4 { font-size: 10px; color: #555; margin-top: 4px; }
+  .summary-row { display: flex; justify-content: center; gap: 24px; margin: 14px 0 18px; }
+  .summary-box { text-align: center; border: 1.5px solid #c8d4e0; border-radius: 8px; padding: 8px 22px; min-width: 100px; }
+  .summary-box .num { font-size: 18px; font-weight: 900; color: #1a3a5c; }
+  .summary-box .lbl { font-size: 10px; color: #5a7394; margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px; }
+  th { background: #1a3a5c; color: #fff; padding: 7px 8px; text-align: center; font-weight: 700; border: 1px solid #b0c0d0; white-space: nowrap; }
+  td { padding: 5px 8px; border: 1px solid #c8d4e0; text-align: center; vertical-align: middle; }
+  tr:nth-child(even) td { background: #f5f8fc; }
+  tfoot td { font-weight: 800; background: #eaf0f7 !important; }
+  .sig-row { display: flex; justify-content: space-between; margin-top: 18mm; padding: 0 20mm; }
+  .sig-box { text-align: center; min-width: 120px; }
+  .sig-box .sig-title { font-weight: 700; color: #1a3a5c; font-size: 11px; }
+  .sig-box .sig-line { margin-top: 30px; border-top: 1.5px solid #333; padding-top: 4px; font-size: 10px; color: #555; }
+  .sig-box .sig-name-preset { margin-top: 2px; font-size: 10px; font-weight: 700; color: #1a3a5c; }
+  .print-bar { padding: 10px 20px; background: #1a3a5c; display: flex; gap: 10px; position: sticky; top: 0; z-index: 10; }
+  .btn-p { background: #c8941a; color: #fff; border: none; padding: 9px 22px; border-radius: 8px; font-family: 'Kantumruy Pro','Hanuman',sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .btn-cl { background: rgba(255,255,255,0.15); color: #fff; border: 1.5px solid rgba(255,255,255,0.3); padding: 9px 18px; border-radius: 8px; font-family: 'Kantumruy Pro','Hanuman',sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+  @media print {
+    .print-bar { display: none !important; }
+    body { background: #fff; }
+    @page { size: A4 portrait; margin: 8mm 10mm; }
+  }
+</style>
+</head>
+<body>
+<div class="print-bar">
+  <button class="btn-p" onclick="window.print()">🖨️ បោះពុម្ព / PDF</button>
+  <button class="btn-cl" onclick="window.close()">✕ បិទ</button>
+</div>
+<div class="sheet">
+  <div class="kh-header">
+    ${getAdminHeaderHTML('របាយការណ៍ចំនួនប្រជាជនចាត់ចែងតាមក្រុមអាយុ', 'ថ្ងៃចេញរបាយការណ៍: ' + today)}
+  </div>
+  <div class="summary-row">
+    <div class="summary-box"><div class="num">${all.length}</div><div class="lbl">ប្រជាជនសរុប</div></div>
+    <div class="summary-box"><div class="num">${totalMale}</div><div class="lbl">ប្រុស</div></div>
+    <div class="summary-box"><div class="num">${totalFemale}</div><div class="lbl">ស្រី</div></div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>ក្រុមអាយុ</th>
+        <th>ប្រុស (នាក់)</th>
+        <th>ស្រី (នាក់)</th>
+        <th>សរុប</th>
+        <th>ភាគរយ</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+    <tfoot>
+      <tr>
+        <td>សរុប</td>
+        <td>${totalMale}</td>
+        <td>${totalFemale}</td>
+        <td>${all.length}</td>
+        <td>100%</td>
+      </tr>
+    </tfoot>
+  </table>
+  ${getSigRowHTML('អ្នកធ្វើរបាយការណ៍')}
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=1100,height=750');
+  if (!win) {
+    showToast('សូមអនុញ្ញាត Popup សម្រាប់គេហទំព័រនេះ ដើម្បីបើករបាយការណ៍', 'warning');
+    return;
+  }
+  win.document.write(html);
+  win.document.close();
+}
+
+// ===== DOWNLOAD PANEL STATS AS PDF (using html2canvas + jsPDF) =====
+async function downloadStatsPDF(panelId, title, btnId) {
+  const panelEl = document.getElementById(panelId);
+  if (!panelEl) return;
+
+  const jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+  if (typeof html2canvas === 'undefined' || !jsPDFCtor) {
+    showToast('មិនអាចផ្ទុកកម្មវិធីបង្កើត PDF បានទេ សូមពិនិត្យការភ្ជាប់អ៊ីនធឺណិត', 'error');
+    return;
+  }
+
+  const btn = btnId ? document.getElementById(btnId) : null;
+  let origBtnHtml = '';
+  if (btn) {
+    origBtnHtml = btn.innerHTML;
+    btn.innerHTML = '⏳ កំពុងបង្កើត...';
+    btn.disabled = true;
+  }
+
+  try {
+    const canvas = await html2canvas(panelEl, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      ignoreElements: (el) => el.classList && el.classList.contains('no-print')
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';
+    const pdf = new jsPDFCtor({ orientation, unit: 'pt', format: 'a4' });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    const imgWidth = pageWidth - margin * 2;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = margin;
+
+    pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+    heightLeft -= (pageHeight - margin * 2);
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight + margin;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+      heightLeft -= (pageHeight - margin * 2);
+    }
+
+    const dateStr = new Date().toISOString().slice(0, 10);
+    pdf.save(`${title}_${dateStr}.pdf`);
+    showToast('ទាញយក PDF ជោគជ័យ!', 'success');
+  } catch (err) {
+    console.error(err);
+    showToast('មានបញ្ហាកើតឡើងក្នុងការបង្កើត PDF', 'error');
+  } finally {
+    if (btn) {
+      btn.innerHTML = origBtnHtml;
+      btn.disabled = false;
+    }
+  }
+}
+
+function renderDocStats(key, opts, containerId, title, icon) {
+  const all = getAllMembers();
+  const total = all.length || 1;
+
+  const counts = opts.map(opt => {
+    const c = all.filter(m => m[key] === opt).length;
+    return {label: opt, count: c, pct: (c/total*100).toFixed(1)};
+  });
+
+  const colors = ['#1a3a5c','#c0392b','#e67e22','#7c3aed','#2980b9','#1a8c5a'];
+
+  const cards = counts.map((c, i) => `
+    <div class="stat-card">
+      <div class="stat-icon" style="background:${colors[i]}22;font-size:1.5rem">${icon}</div>
+      <div>
+        <div class="stat-num" style="color:${colors[i]}">${c.count}</div>
+        <div class="stat-label">${c.label}</div>
+        <div class="stat-pct">${c.pct}%</div>
+      </div>
+    </div>`).join('');
+
+  const rows = counts.map((c, i) => `
+    <tr>
+      <td>${c.label}</td>
+      <td style="font-weight:700;color:${colors[i]}">${c.count} នាក់</td>
+      <td>
+        <span class="pct-bar" style="width:${Math.round(c.count/total*100)}px;background:${colors[i]}"></span>
+        ${c.pct}%
+      </td>
+    </tr>`).join('');
+
+  document.getElementById(containerId).innerHTML = `
+    <div class="stats-grid">${cards}</div>
+    <div class="section-title">តារាងព័ត៌មាន${title}</div>
+    <div class="age-table-wrap">
+      <table class="age-table">
+        <thead><tr><th>ប្រភេទ</th><th>ចំនួន</th><th>ភាគរយ</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="3" style="text-align:center;padding:30px">គ្មានទិន្នន័យ</td></tr>'}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderMigrationStats() {
+  const all = getAllMembers().filter(m => m.work_location && m.work_location !== '');
+  const total = all.length || 1;
+
+  // Group by location
+  const locationMap = {};
+  all.forEach(m => {
+    let loc = m.work_location;
+    if (loc === 'ក្រៅប្រទេស' && m.work_note) {
+      loc = 'ក្រៅប្រទេស (' + m.work_note + ')';
+    }
+    locationMap[loc] = (locationMap[loc] || 0) + 1;
+  });
+
+  const sorted = Object.entries(locationMap).sort((a,b) => b[1]-a[1]);
+  const grandTotal = all.length;
+
+  const cards = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(124,58,237,0.12)">✈️</div><div><div class="stat-num">${grandTotal}</div><div class="stat-label">ចំនួនចំណាកស្រុកសរុប</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(26,58,92,0.12)">🗺️</div><div><div class="stat-num">${sorted.length}</div><div class="stat-label">ចំនួនទីតាំង</div></div></div>
+    </div>`;
+
+  const rows = sorted.map(([loc, cnt]) => `
+    <tr>
+      <td style="font-weight:600">${loc}</td>
+      <td style="font-weight:700;color:var(--primary)">${cnt} នាក់</td>
+      <td>
+        <span class="pct-bar" style="width:${Math.round(cnt/grandTotal*100)}px"></span>
+        ${(cnt/grandTotal*100).toFixed(1)}%
+      </td>
+    </tr>`).join('');
+
+  document.getElementById('migration-stats').innerHTML = cards + `
+    <div class="section-title">ចំណាកស្រុកតាមទីតាំង</div>
+    <div class="age-table-wrap">
+      <table class="age-table">
+        <thead><tr><th>ទីតាំង</th><th>ចំនួន</th><th>ភាគរយ</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="3" style="text-align:center;padding:30px;color:var(--text-muted)">គ្មានទិន្នន័យ</td></tr>'}</tbody>
+      </table>
+    </div>`;
+}
+
+// ===== TOAST =====
+function showToast(msg, type='info', duration=3000) {
+  const t = document.getElementById('toast');
+  const icons = {success:'✅', error:'❌', info:'💾', warning:'⚠️'};
+  const colors = {
+    success:'linear-gradient(135deg,#1a8c5a,#145c3e)',
+    error:'linear-gradient(135deg,#c0392b,#8b1a12)',
+    info:'linear-gradient(135deg,#1a3a5c,#2563a8)',
+    warning:'linear-gradient(135deg,#c8941a,#e67e22)'
+  };
+  t.innerHTML = (icons[type]||'ℹ️') + ' ' + msg;
+  t.style.background = colors[type] || colors.info;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(80px)';
+  }, duration);
+}
+
+// ===== EXPORT JSON =====
+function exportJSON() {
+  const data = {
+    version: '1.0',
+    exportDate: new Date().toISOString(),
+    familyCounter,
+    families
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  a.href = url;
+  a.download = 'ទិន្នន័យប្រជាជន_' + dateStr + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('បានរក្សាទុកទិន្នន័យជោគជ័យ! (' + families.length + ' គ្រួសារ)', 'success');
+}
+
+// ===== IMPORT JSON =====
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.families || !Array.isArray(data.families)) {
+        showToast('File JSON មិនត្រឹមត្រូវ! សូមប្រើ File ដែល Export ពី App នេះ', 'error', 4000);
+        return;
+      }
+      // Confirm if existing data
+      if (families.length > 0) {
+        if (!confirm('⚠️ ការ Import នឹងជំនួសទិន្នន័យបច្ចុប្បន្ន (' + families.length + ' គ្រួសារ)!\n\nទិន្នន័យ Export ថ្មី: ' + data.families.length + ' គ្រួសារ\nExport ថ្ងៃ: ' + (data.exportDate ? new Date(data.exportDate).toLocaleDateString('km-KH') : 'មិនដឹង') + '\n\nចង់ Import ចូលមែនទេ?')) {
+          input.value = '';
+          return;
+        }
+      }
+      families = data.families;
+      familyCounter = data.familyCounter || families.length;
+      save();
+      renderFamilies();
+      updateFamilySummary();
+      showToast('Import ជោគជ័យ! (' + families.length + ' គ្រួសារ)', 'success', 4000);
+    } catch(err) {
+      showToast('File JSON ខូច! មិនអាច Import បាន', 'error', 4000);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+// ===== REPORT MODAL =====
+let _reportKey = '';
+let _reportLabel = '';
+let _reportMembers = [];
+
+function openReportModal(docKey, docLabel, panelType) {
+  _reportKey = docKey;
+  _reportLabel = docLabel;
+
+  const all = getAllMembers();
+  let missing = [];
+
+  if (panelType === 'migration') {
+    // Missing = those with NO work_location
+    missing = all.filter(m => !m.work_location || m.work_location.trim() === '');
+  } else {
+    // Missing = those whose docKey value is 'គ្មាន', empty, or null
+    missing = all.filter(m => {
+      const v = (m[docKey] || '').trim();
+      return v === '' || v === 'គ្មាន';
+    });
+  }
+
+  _reportMembers = missing;
+
+  document.getElementById('report-modal-title').textContent = '📊 បញ្ជីឈ្មោះប្រជាជនដែលមិនមាន' + docLabel;
+  renderReportSheet(missing, docLabel);
+  document.getElementById('report-modal-overlay').classList.add('open');
+}
+
+function closeReportModal() {
+  document.getElementById('report-modal-overlay').classList.remove('open');
+}
+
+function renderReportSheet(members, docLabel) {
+  const today = new Date().toLocaleDateString('km-KH', {year:'numeric', month:'long', day:'numeric'});
+  let rows = '';
+  if (members.length === 0) {
+    rows = `<tr><td colspan="6" class="report-no-data">🎉 ប្រជាជនទាំងអស់មាន${docLabel}រួចហើយ!</td></tr>`;
+  } else {
+    members.forEach((m, i) => {
+      const age = calcAge(m.dob) || '-';
+      rows += `<tr>
+        <td>${i + 1}</td>
+        <td>${m.familyGroup || m.group || '-'}</td>
+        <td>${m.house_code || '-'}</td>
+        <td>${age}</td>
+        <td style="text-align:left;font-weight:600">${m.name || '(គ្មានឈ្មោះ)'}</td>
+        <td>${m.gender || '-'}</td>
+      </tr>`;
+    });
+  }
+
+  document.getElementById('report-sheet-container').innerHTML = `
+    <div class="report-sheet" id="report-sheet">
+      <div class="report-kh-header">
+        ${getAdminHeaderHTML('បញ្ជីឈ្មោះប្រជាជនដែលមិនមាន' + docLabel, 'ចំនួនសរុប: ' + members.length + ' នាក់ &nbsp;|&nbsp; ថ្ងៃចេញ: ' + today)}
+      </div>
+      <div class="report-table-wrap">
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>ល.រ</th>
+              <th>លេខក្រុម</th>
+              <th>លេខគ្រួសារ</th>
+              <th>អាយុ</th>
+              <th>ឈ្មោះ${docLabel}</th>
+              <th>ភេទ</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div class="report-sig-row">
+        <div class="report-sig-box">
+          <div class="sig-title">មេភូមិ${adminInfo.village ? ' ' + adminInfo.village : ''}</div>
+          <div class="sig-name-line">ហត្ថលេខា និងឈ្មោះ</div>
+          ${adminInfo.chiefName ? `<div style="margin-top:2px;font-size:0.78rem;font-weight:700;color:var(--primary)">${adminInfo.chiefName}</div>` : ''}
+        </div>
+        <div class="report-sig-box">
+          <div class="sig-title">មេក្រុម</div>
+          <div class="sig-name-line">ហត្ថលេខា និងឈ្មោះ</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ===== PRESENCE REPORT (មាន / គ្មាន) =====
+function printPresenceReport(docKey, docLabel, mode) {
+  const all = getAllMembers();
+  let filtered;
+  if (docKey === 'work_location') {
+    filtered = all.filter(m => {
+      const has = !!(m.work_location && m.work_location.trim() !== '');
+      return mode === 'has' ? has : !has;
+    });
+  } else {
+    filtered = all.filter(m => {
+      const has = (m[docKey] || '').trim() === 'មាន';
+      return mode === 'has' ? has : !has;
+    });
+  }
+
+  const modeLabel = mode === 'has' ? 'មាន' : 'គ្មាន';
+  const today = new Date().toLocaleDateString('km-KH', {year:'numeric', month:'long', day:'numeric'});
+
+  const headNameOf = (m) => {
+    const headFamily = families[m.fi];
+    return (headFamily && headFamily.members[0] && headFamily.members[0].name) || '-';
+  };
+
+  // Computes, for a sequence of members (already grouped/contiguous by family),
+  // how many consecutive rows belong to the same family so the head-of-family
+  // cell can be merged (rowspan) instead of repeating on every row.
+  const computeFamilySpans = (list) => {
+    const spans = [];
+    let i = 0;
+    while (i < list.length) {
+      let j = i;
+      while (j < list.length && list[j].fi === list[i].fi) j++;
+      spans[i] = j - i;
+      for (let k = i + 1; k < j; k++) spans[k] = 0;
+      i = j;
+    }
+    return spans;
+  };
+
+  // ===== COMBINED (សរុបរួម) TABLE =====
+  let combinedRows = '';
+  if (filtered.length === 0) {
+    combinedRows = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#777;">🎉 គ្មានទិន្នន័យ</td></tr>`;
+  } else {
+    const combinedSpans = computeFamilySpans(filtered);
+    filtered.forEach((m, i) => {
+      const age = calcAge(m.dob) || '-';
+      const headCell = combinedSpans[i] > 0
+        ? `<td rowspan="${combinedSpans[i]}" style="font-weight:600;">${headNameOf(m)}</td>`
+        : '';
+      combinedRows += `<tr>
+        <td>${i + 1}</td>
+        <td>${m.familyGroup || m.group || '-'}</td>
+        <td>${m.house_code || '-'}</td>
+        ${headCell}
+        <td>${age}</td>
+        <td style="text-align:left;font-weight:600">${m.name || '(គ្មានឈ្មោះ)'}</td>
+        <td>${m.gender || '-'}</td>
+      </tr>`;
+    });
+  }
+
+  const combinedHtml = `
+  <div class="sheet-inner">
+    <table>
+      <thead>
+        <tr>
+          <th>ល.រ</th>
+          <th>លេខក្រុម</th>
+          <th>លេខគ្រួសារ</th>
+          <th>ឈ្មោះមេគ្រួសារ</th>
+          <th>អាយុ</th>
+          <th>ឈ្មោះអ្នកដែល${modeLabel}${docLabel}</th>
+          <th>ភេទ</th>
+        </tr>
+      </thead>
+      <tbody>${combinedRows}</tbody>
+    </table>
+    ${getSigRowHTML('លេខាកត់ត្រា')}
+  </div>`;
+
+  // ===== GROUPED (តាមក្រុម) SECTIONS =====
+  const groupMap = {};
+  const groupOrder = [];
+  filtered.forEach(m => {
+    const g = (m.familyGroup || m.group || 'ក្រុមមិនកំណត់').trim() || 'ក្រុមមិនកំណត់';
+    if (!groupMap[g]) { groupMap[g] = []; groupOrder.push(g); }
+    groupMap[g].push(m);
+  });
+
+  let groupedHtml = '';
+  if (filtered.length === 0) {
+    groupedHtml = `<div class="sheet-inner"><table><tbody><tr><td style="text-align:center;padding:40px;color:#777;">🎉 គ្មានទិន្នន័យ</td></tr></tbody></table></div>`;
+  } else {
+    groupedHtml = groupOrder.map((g, gi) => {
+      const members = groupMap[g];
+      const groupSpans = computeFamilySpans(members);
+      let rows = members.map((m, i) => {
+        const age = calcAge(m.dob) || '-';
+        const headCell = groupSpans[i] > 0
+          ? `<td rowspan="${groupSpans[i]}" style="font-weight:600;">${headNameOf(m)}</td>`
+          : '';
+        return `<tr>
+          <td>${i + 1}</td>
+          <td>${m.house_code || '-'}</td>
+          ${headCell}
+          <td>${age}</td>
+          <td style="text-align:left;font-weight:600">${m.name || '(គ្មានឈ្មោះ)'}</td>
+          <td>${m.gender || '-'}</td>
+        </tr>`;
+      }).join('');
+      return `
+      <div class="sheet-inner group-section ${gi < groupOrder.length - 1 ? 'page-break' : ''}">
+        <div class="group-title">ក្រុម: ${g} &nbsp;—&nbsp; ${members.length} នាក់</div>
+        <table>
+          <thead>
+            <tr>
+              <th>ល.រ</th>
+              <th>លេខគ្រួសារ</th>
+              <th>ឈ្មោះមេគ្រួសារ</th>
+              <th>អាយុ</th>
+              <th>ឈ្មោះអ្នកដែល${modeLabel}${docLabel}</th>
+              <th>ភេទ</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        ${getSigRowHTML('មេក្រុម ' + g)}
+      </div>`;
+    }).join('');
+  }
+
+  const html = `<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8"/>
+<title>បញ្ជីឈ្មោះប្រជាជនដែល${modeLabel}${docLabel}</title>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Hanuman:wght@400;700&family=Moul&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Kantumruy Pro', 'Hanuman', sans-serif; background: #fff; color: #1a2636; font-size: 12px; }
+  .sheet { width: 267mm; min-height: 185mm; margin: 0 auto; padding: 10mm 12mm; background: #fff; }
+  .kh-header { text-align: center; padding-bottom: 10px; border-bottom: 2.5px solid #1a3a5c; margin-bottom: 10px; }
+  .kh-header .line1 { font-family: 'Moul', serif; font-size: 20px; font-weight: 400; color: #1a2636; letter-spacing: 0.5px; }
+  .kh-header .line2 { font-family: 'Moul', serif; font-size: 15px; font-weight: 400; color: #1a2636; margin-top: 4px; letter-spacing: 0.5px; }
+  .kh-header .line3 { font-size: 15px; font-weight: 900; color: #1a3a5c; margin-top: 7px; }
+  .kh-header .line-admin { font-size: 10.5px; color: #2563a8; font-weight: 600; margin-top: 5px; }
+  .kh-header .line4 { font-size: 10px; color: #555; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px; }
+  th { background: #1a3a5c; color: #fff; padding: 8px 8px; text-align: center; font-weight: 700; border: 1px solid #b0c0d0; white-space: nowrap; }
+  td { padding: 6px 8px; border: 1px solid #c8d4e0; text-align: center; vertical-align: middle; }
+  tr:nth-child(even) td { background: #f5f8fc; }
+  .sig-row { display: flex; justify-content: space-between; margin-top: 20mm; padding: 0 20mm; }
+  .sig-box { text-align: center; min-width: 120px; }
+  .sig-box .sig-title { font-weight: 700; color: #1a3a5c; font-size: 11px; }
+  .sig-box .sig-line { margin-top: 30px; border-top: 1.5px solid #333; padding-top: 4px; font-size: 10px; color: #555; }
+  .sig-box .sig-name-preset { margin-top: 2px; font-size: 10px; font-weight: 700; color: #1a3a5c; }
+  .group-title { font-size: 13px; font-weight: 800; color: #1a3a5c; background: #eaf0f7; border: 1px solid #c8d4e0; border-radius: 6px; padding: 7px 14px; margin-bottom: 6px; }
+  .group-section.page-break { page-break-after: always; margin-bottom: 26px; }
+  .view-panel { display: none; }
+  .view-panel.active { display: block; }
+  .print-bar { padding: 10px 20px; background: #1a3a5c; display: flex; gap: 10px; align-items: center; position: sticky; top: 0; z-index: 10; flex-wrap: wrap; }
+  .btn-p { background: #c8941a; color: #fff; border: none; padding: 9px 22px; border-radius: 8px; font-family: 'Kantumruy Pro','Hanuman',sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .btn-view { background: rgba(255,255,255,0.14); color: #fff; border: 1.5px solid rgba(255,255,255,0.3); padding: 9px 20px; border-radius: 8px; font-family: 'Kantumruy Pro','Hanuman',sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-view.active-view { background: #2563a8; border-color: #2563a8; }
+  .btn-cl { background: rgba(255,255,255,0.15); color: #fff; border: 1.5px solid rgba(255,255,255,0.3); padding: 9px 18px; border-radius: 8px; font-family: 'Kantumruy Pro','Hanuman',sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; margin-left: auto; }
+  @media print {
+    .print-bar { display: none !important; }
+    body { background: #fff; }
+    @page { size: A4 landscape; margin: 8mm 10mm; }
+  }
+</style>
+</head>
+<body>
+<div class="print-bar">
+  <button class="btn-p" onclick="window.print()">🖨️ បោះពុម្ព / PDF</button>
+  <button class="btn-view active-view" id="btn-view-combined" onclick="setReportView('combined')">📋 សរុបរួម</button>
+  <button class="btn-view" id="btn-view-group" onclick="setReportView('group')">👥 តាមក្រុម</button>
+  <button class="btn-cl" onclick="window.close()">✕ បិទ</button>
+</div>
+<div class="sheet">
+  <div class="kh-header">
+    ${getAdminHeaderHTML('បញ្ជីឈ្មោះប្រជាជនដែល' + modeLabel + docLabel, 'ចំនួន: ' + filtered.length + ' នាក់ &nbsp;|&nbsp; ថ្ងៃចេញ: ' + today)}
+  </div>
+  <div class="view-panel active" id="view-combined">${combinedHtml}</div>
+  <div class="view-panel" id="view-group">${groupedHtml}</div>
+</div>
+<script>
+  function setReportView(v) {
+    document.getElementById('view-combined').classList.toggle('active', v === 'combined');
+    document.getElementById('view-group').classList.toggle('active', v === 'group');
+    document.getElementById('btn-view-combined').classList.toggle('active-view', v === 'combined');
+    document.getElementById('btn-view-group').classList.toggle('active-view', v === 'group');
+  }
+<\/script>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=1100,height=750');
+  if (!win) {
+    showToast('សូមអនុញ្ញាត Popup សម្រាប់គេហទំព័រនេះ ដើម្បីបើករបាយការណ៍', 'warning');
+    return;
+  }
+  win.document.write(html);
+  win.document.close();
+}
+
+
+function printReport(mode) {
+  const members = _reportMembers;
+  const docLabel = _reportLabel;
+  const today = new Date().toLocaleDateString('km-KH', {year:'numeric', month:'long', day:'numeric'});
+
+  let filtered = [];
+  if (mode === 'person') {
+    filtered = members;
+  } else if (mode === 'family') {
+    // Group by house_code, keep one per house_code
+    const seen = new Set();
+    filtered = members.filter(m => {
+      const k = (m.house_code || '__no_hc__' + m.fi);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  } else if (mode === 'group') {
+    // Group by familyGroup, keep one per group
+    const seen = new Set();
+    filtered = members.filter(m => {
+      const k = (m.familyGroup || m.group || '__no_grp__' + m.fi);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  }
+
+  const modeLabel = mode === 'person' ? 'បុគ្គល' : mode === 'family' ? 'គ្រួសារ' : 'ក្រុម';
+
+  let rows = '';
+  if (filtered.length === 0) {
+    rows = `<tr><td colspan="6" style="text-align:center;padding:40px;color:#777;">🎉 គ្មានទិន្នន័យ</td></tr>`;
+  } else {
+    filtered.forEach((m, i) => {
+      const age = calcAge(m.dob) || '-';
+      rows += `<tr>
+        <td>${i + 1}</td>
+        <td>${m.familyGroup || m.group || '-'}</td>
+        <td>${m.house_code || '-'}</td>
+        <td>${age}</td>
+        <td style="text-align:left;font-weight:600">${m.name || '(គ្មានឈ្មោះ)'}</td>
+        <td>${m.gender || '-'}</td>
+      </tr>`;
+    });
+  }
+
+  const html = `<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8"/>
+<title>បញ្ជីឈ្មោះប្រជាជនដែលមិនមាន${docLabel} (${modeLabel})</title>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Hanuman:wght@400;700&family=Moul&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Kantumruy Pro', 'Hanuman', sans-serif; background: #fff; color: #1a2636; font-size: 12px; }
+  .sheet { width: 267mm; min-height: 185mm; margin: 0 auto; padding: 10mm 12mm; background: #fff; }
+  .kh-header { text-align: center; padding-bottom: 10px; border-bottom: 2.5px solid #1a3a5c; margin-bottom: 10px; }
+  .kh-header .line1 { font-family: 'Moul', serif; font-size: 20px; font-weight: 400; color: #1a2636; letter-spacing: 0.5px; }
+  .kh-header .line2 { font-family: 'Moul', serif; font-size: 15px; font-weight: 400; color: #1a2636; margin-top: 4px; letter-spacing: 0.5px; }
+  .kh-header .line3 { font-size: 15px; font-weight: 900; color: #1a3a5c; margin-top: 7px; }
+  .kh-header .line-admin { font-size: 10.5px; color: #2563a8; font-weight: 600; margin-top: 5px; }
+  .kh-header .line4 { font-size: 10px; color: #555; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px; }
+  th { background: #1a3a5c; color: #fff; padding: 8px 8px; text-align: center; font-weight: 700; border: 1px solid #b0c0d0; white-space: nowrap; }
+  td { padding: 6px 8px; border: 1px solid #c8d4e0; text-align: center; vertical-align: middle; }
+  tr:nth-child(even) td { background: #f5f8fc; }
+  .sig-row { display: flex; justify-content: space-between; margin-top: 20mm; padding: 0 20mm; }
+  .sig-box { text-align: center; min-width: 120px; }
+  .sig-box .sig-title { font-weight: 700; color: #1a3a5c; font-size: 11px; }
+  .sig-box .sig-line { margin-top: 30px; border-top: 1.5px solid #333; padding-top: 4px; font-size: 10px; color: #555; }
+  .sig-box .sig-name-preset { margin-top: 2px; font-size: 10px; font-weight: 700; color: #1a3a5c; }
+  .print-bar { padding: 10px 20px; background: #1a3a5c; display: flex; gap: 10px; position: sticky; top: 0; z-index: 10; }
+  .btn-p { background: #c8941a; color: #fff; border: none; padding: 9px 22px; border-radius: 8px; font-family: 'Kantumruy Pro','Hanuman',sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .btn-cl { background: rgba(255,255,255,0.15); color: #fff; border: 1.5px solid rgba(255,255,255,0.3); padding: 9px 18px; border-radius: 8px; font-family: 'Kantumruy Pro','Hanuman',sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+  @media print {
+    .print-bar { display: none !important; }
+    body { background: #fff; }
+    @page { size: A4 landscape; margin: 8mm 10mm; }
+  }
+</style>
+</head>
+<body>
+<div class="print-bar">
+  <button class="btn-p" onclick="window.print()">🖨️ បោះពុម្ព / PDF</button>
+  <button class="btn-cl" onclick="window.close()">✕ បិទ</button>
+</div>
+<div class="sheet">
+  <div class="kh-header">
+    ${getAdminHeaderHTML('បញ្ជីឈ្មោះប្រជាជនដែលមិនមាន' + docLabel, 'ទម្រង់: ' + modeLabel + ' &nbsp;|&nbsp; ចំនួន: ' + filtered.length + ' ' + (modeLabel === 'ក្រុម' ? 'ក្រុម' : modeLabel === 'គ្រួសារ' ? 'គ្រួសារ' : 'នាក់') + ' &nbsp;|&nbsp; ថ្ងៃចេញ: ' + today)}
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>ល.រ</th>
+        <th>លេខក្រុម</th>
+        <th>លេខគ្រួសារ</th>
+        <th>អាយុ</th>
+        <th>ឈ្មោះ${docLabel}</th>
+        <th>ភេទ</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+  ${getSigRowHTML('មេក្រុម')}
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=1100,height=750');
+  if (!win) {
+    showToast('សូមអនុញ្ញាត Popup សម្រាប់គេហទំព័រនេះ ដើម្បីបើករបាយការណ៍', 'warning');
+    return;
+  }
+  win.document.write(html);
+  win.document.close();
+}
+
+// ===== INIT =====
+renderFamilies();
+updateFamilySummary();
+
+// Auto-refresh ages every hour
+setInterval(() => {
+  if (document.getElementById('panel-families').classList.contains('active')) {
+    renderFamilies();
+  }
+}, 3600000);
+</script>
+</body>
+</html>
